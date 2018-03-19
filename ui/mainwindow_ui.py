@@ -1,27 +1,24 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+from multiprocessing import Process
 
 class ExampleUI (QMainWindow):
     LABELFONT = 15
-    add_button = pyqtSignal('QGridLayout', int, str, str, int)
+    add_button = pyqtSignal('QGridLayout', int, int, int, str, str, str, int)
 
     def __init__(self):
         super(ExampleUI, self).__init__()
 
-        self.resize(1000, 800)
+        self.resize(1200, 800)
         self.center()
         self.statusBar().showMessage('Ready')
-        self.setWindowTitle('Example')
+        self.setWindowTitle('Channel Plot')
         self.setMenuBar(self.mymenu())
 
         self.key = 0
-        self.is_rm_c1 = False
-        self.is_rm_c2 = False
-        self.is_rm_c3 = False
-        self.addtop = False
+        self.channel_count = 0
         self.addtopbottom = False
-        self.rm_list = list()
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -42,9 +39,9 @@ class ExampleUI (QMainWindow):
         self.y_axis = QLineEdit()
 
         # Graph type list for displaying option
-        self.graph_type.addItem('Random')
-        self.graph_type.addItem('Sine wave')
-        self.graph_type.addItem('Real-time plot')
+        self.graph_type.addItem('Random Plot')
+        self.graph_type.addItem('Sine wave Simulator')
+        self.graph_type.addItem('Serial Channel')
 
         vertical_menu = QVBoxLayout()
         vertical_menu.setAlignment(Qt.AlignLeft)
@@ -55,7 +52,7 @@ class ExampleUI (QMainWindow):
         selectC = QHBoxLayout()
         selectC.addWidget(self.channel_list)
         channel_select.setLayout(selectC)
-        channel_select.setFixedWidth(self.width()/4)
+        channel_select.setFixedWidth(self.width()/5)
         channel_select.setFixedHeight(self.height()/8)
 
         add_channel = QGroupBox('Add Channel')
@@ -68,7 +65,7 @@ class ExampleUI (QMainWindow):
         addC.addRow(str(''), add_btn)
 
         add_channel.setLayout(addC)
-        add_channel.setFixedWidth(self.width()/4)
+        add_channel.setFixedWidth(self.width()/5)
 
         vertical_menu.addWidget(channel_select)
         vertical_menu.addWidget(add_channel)
@@ -157,22 +154,28 @@ class ExampleUI (QMainWindow):
     def on_add_event(self):
         sending_button = self.sender()
         self.statusBar().showMessage('{}'.format(sending_button.text()))
-        if self.addtop and self.key == 2:
-            self.key = 4
-        elif self.addtopbottom and self.key == 1:
-            self.key = 3
-        else:
-            self.key += 1
 
-        if self.key >= 4:
+        # Add 1 on top and 1 in bottom
+        if self.addtopbottom and self.key == 1:
+            self.key = 2
+            self.addtopbottom = False
+
+        if self.channel_count >= 3:
             message = QMessageBox.information(self, 'Message', 'Number of displayed graph exceeds the limit.', QMessageBox.Ok)
             if QMessageBox.Ok:
                 pass
         else:
-            self.add_button.emit(self.graph_display, self.graph_type.currentIndex(), self.x_axis.text(), self.y_axis.text(), self.key)
+            self.channel_count += 1
+            self.key += 1
+
+            self.add_button.emit(self.graph_display, self.graph_type.currentIndex(),
+                                 self.width(),self.height(),
+                                 self.x_axis.text(), self.y_axis.text(), self.channel_name.text(),
+                                 self.key)
             self.channel_name.clear()
             self.x_axis.clear()
             self.y_axis.clear()
+
 
     def make_connection(self, _object_):
         _object_.rm_button.connect(self.remove_channel)
@@ -180,21 +183,24 @@ class ExampleUI (QMainWindow):
     @pyqtSlot('QGroupBox',int,int)
     def remove_channel(self, rm_layout, rm_id, add_position):
         rm_layout.close()
-        self.rm_list.append(rm_id)
+        self.channel_count -= 1
 
-        # Add 1 widget on top and 1 at botton
-        if add_position == 1:
-            self.key = 0
-            self.addtopbottom = True
-        # Add 2 widget on top
-        elif add_position == 2:
-            self.key = 0
-            self.addtop = True
-        # Add 2 widget on bottom
-        elif add_position == 3:
-            self.key = 1
+        # Position to add graph
+        if self.channel_count == 1:
+            # Add 1 widget on top and 1 at bottom
+            if add_position == 1:
+                self.key = 0
+                self.addtopbottom = True
+            # Add 2 widget on top
+            elif add_position == 2:
+                self.key = 0
+            # Add 2 widget on bottom
+            elif add_position == 3:
+                self.key = 1
         else:
             self.key = rm_id-1
+
+
 
 
 

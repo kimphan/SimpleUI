@@ -11,4 +11,6 @@ if __name__ == '__main__':
     graph = GraphUi()
     graph.make_connection(window)
     window.make_connection(graph)
+
+
     sys.exit(app.exec_())
