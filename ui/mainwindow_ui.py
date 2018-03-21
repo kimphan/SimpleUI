@@ -48,7 +48,7 @@ class ExampleUI (QMainWindow):
         vertical_menu.SetFixedSize
 
         channel_select = QGroupBox('Channel Select')
-        channel_select.setStyleSheet('font-size: 14pt; font-style: bold; color: 606060;')
+        channel_select.setStyleSheet('font-size: 12pt; color: 606060;')
         selectC = QHBoxLayout()
         selectC.addWidget(self.channel_list)
         channel_select.setLayout(selectC)
@@ -56,7 +56,7 @@ class ExampleUI (QMainWindow):
         channel_select.setFixedHeight(self.height()/8)
 
         add_channel = QGroupBox('Add Channel')
-        add_channel.setStyleSheet('font-size: 14pt; font-style: bold; color: 606060;')
+        add_channel.setStyleSheet('font-size: 12pt; color: 606060;')
         addC = QFormLayout()
         addC.addRow(str('Graph type: '), self.graph_type)
         addC.addRow(str('Channel Name: '), self.channel_name)
@@ -79,31 +79,12 @@ class ExampleUI (QMainWindow):
 
     # Label
     @staticmethod
-    def label(name,fontsize=20):
+    def label(name,fontsize=12):
         lbl = QLabel()
         lbl.setText(name)
         lbl.minimumSizeHint()
-        lbl.setStyleSheet('font-size: {}pt; font-style: bold; color: 606060;'.format(fontsize))
+        lbl.setStyleSheet('font-size: {}pt; color: 606060;'.format(fontsize))
         return lbl
-
-    # @staticmethod
-    # def addgraph(title, button,label):
-    #     graph_holder = QGroupBox(title)
-    #
-    #     graph = QVBoxLayout()
-    #     lbl = QLabel()
-    #     lbl.setText(label)
-    #     lbl.minimumSizeHint()
-    #     lbl.setStyleSheet('font-size: 15pt; font-style: bold; color: 606060;')
-    #     btn = QPushButton(button)
-    #     btn.setStyleSheet('font-size: 15pt;')
-    #
-    #     graph.addWidget(lbl)
-    #     # graph.addWidget(clist2, 5, Qt.AlignLeft)
-    #     graph.addWidget(btn, Qt.AlignRight)
-    #     graph_holder.setLayout(graph)
-    #
-    #     return graph_holder
 
     # Put the application window in the center of the screen
     def center(self):
@@ -114,8 +95,6 @@ class ExampleUI (QMainWindow):
 
         # Menu bar
     def mymenu(self):
-         # saveaction = self.actiondef('Save',QKeySequence.Save,self.saveact)
-            # editaction = self.actiondef('Edit',QKeySequence.Back,self.editact)
 
         saveaction = self.actiondef('Save', QKeySequence.Save, self.saveact)
         editaction = self.actiondef('Edit', QKeySequence.Back, self.editact)
@@ -142,7 +121,6 @@ class ExampleUI (QMainWindow):
 
     def editact(self):
         print('edit act')
-
 
     # Button and event handling
     def button(self,name, handler, fontsize=12):

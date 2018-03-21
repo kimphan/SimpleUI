@@ -21,11 +21,7 @@ class GraphUi(QDialog):
 
     def addgraph(self, width, height, i, key, xname, yname, title):
         # Plot Config
-        self.plot_widget = pg.PlotWidget(parent=None, background=pg.mkColor('#FFF'))
-        self.plot_widget.setLabel('left', yname)
-        self.plot_widget.setLabel('bottom', xname)
-        self.plot_widget.plotItem.showGrid(True, True, 0.7)
-        self.pen = pg.mkPen(self.color_dict[key-1], width=3, style=None)
+        self._plot_config(yname, xname,key)
 
         # Display Setup
         self.sample_num = QLineEdit()
@@ -36,12 +32,12 @@ class GraphUi(QDialog):
 
         self.run_btn = QPushButton('Run')
         self.run_btn.setObjectName('run')
-        self.run_btn.setStyleSheet('font-size: 13pt;')
+        self.run_btn.setStyleSheet('font-size: 12pt;')
         self.run_btn.pressed.connect(lambda: self.on_run_event(i))
 
         self.stop_btn = QPushButton('Stop')
         self.stop_btn.setObjectName('stop')
-        self.stop_btn.setStyleSheet('font-size: 13pt;')
+        self.stop_btn.setStyleSheet('font-size: 12pt;')
         self.stop_btn.pressed.connect(self.on_stop_event)
 
 
@@ -51,7 +47,7 @@ class GraphUi(QDialog):
 
         remove_btn = QPushButton('Remove')
         remove_btn.setObjectName(str(key))
-        remove_btn.setStyleSheet('font-size: 13pt;')
+        remove_btn.setStyleSheet('font-size: 12pt;')
         remove_btn.pressed.connect(self.on_remove_event)
 
         graph_widget = QGroupBox(title)
@@ -89,6 +85,14 @@ class GraphUi(QDialog):
         self.worker = Worker()
         self._configure_timers()
         return graph_widget
+
+    # Plot Widget configuration
+    def _plot_config(self, yname, xname, key):
+        self.plot_widget = pg.PlotWidget(parent=None, background=pg.mkColor('#FFF'))
+        self.plot_widget.setLabel('left', yname)
+        self.plot_widget.setLabel('bottom', xname)
+        self.plot_widget.plotItem.showGrid(True, True, 0.7)
+        self.pen = pg.mkPen(self.color_dict[key-1], width=3, style=None)
 
     # Set timer to update graph every 20 ms
     def _configure_timers(self):
