@@ -6,7 +6,7 @@ Parser: local process
         https://github.com/ssepulveda/RTGraph
 """
 import signal, time
-from multiprocessing import Process, Queue, Event
+from multiprocessing import Process, Queue, Event, Manager
 
 
 class Parser(Process):
@@ -26,7 +26,6 @@ class Parser(Process):
     def stop(self):
         self._exit.set()
         time.sleep(0.1)
-
 
     def add(self, data):
         self._importQ.put(data)
