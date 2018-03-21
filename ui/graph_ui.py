@@ -1,12 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.Qt import Qt
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QTimer
-from multiprocessing import Lock
-from helper.ringBuffer import *
 from processes.worker import Worker
 import pyqtgraph as pg
-import numpy as np
-import os
+
 
 
 class GraphUi(QDialog):
@@ -103,6 +100,7 @@ class GraphUi(QDialog):
         self.worker.get_plot_value()
         self.plot_widget.plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(), pen=self.pen)
 
+
     def make_connection(self, _object_):
         _object_.add_button.connect(self.display)
 
@@ -137,23 +135,31 @@ class GraphUi(QDialog):
 
     # Run button Handler
     def on_run_event(self,i):
-        self.run_btn.setEnabled(False)
-        self.lock = Lock()
+
+        self.enable_ui(False)
         self.worker = Worker(graph_id= i,
                              samples=int(self.sample_num.text()),
                              rate=float(self.rate_num.text()),
-                             lock=self.lock,
                              port=self.serial_port.text())
-
         self.worker.start()
         if self.worker.is_alive():
             self._timer_plot.start(20)
         else:
             print('worker not start')
+        print(str('Worker pid {}').format(self.worker.pid))
 
     def on_stop_event(self):
         self.run_btn.setEnabled(True)
         self._timer_plot.stop()
+        self.worker.stop()
+        self.enable_ui(True)
+
+    def enable_ui(self, e):
+        self.sample_num.setEnabled(e)
+        self.rate_num.setEnabled(e)
+        self.serial_port.setEnabled(e)
+        self.run_btn.setEnabled(e)
+        self.stop_btn.setEnabled(not e)
 
     @pyqtSlot('QGridLayout', int, int, int, str, str, str, int)
     def display(self, graph_display, index, width, height, xname, yname, title, key):
@@ -161,7 +167,6 @@ class GraphUi(QDialog):
         channel = self.addgraph(width, height, index, key, xname, yname, title)
         graph_display.addWidget(channel, key, 0)
         self.index = index
-        print('add key{}'.format(self.channel_dict.keys()))
 
 
 

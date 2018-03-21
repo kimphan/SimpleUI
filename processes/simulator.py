@@ -22,22 +22,20 @@ class SineSimulator(Process):
     def __init__(self, parser):
         Process.__init__(self)
         self._parser = parser
-        self._exit = None
+        self._exit = Event()
         self._speed = None
 
-
     def run(self):
-        t = time()
+        t1 = time()
         while not self._exit.is_set():
-            x = time() - t
-            y = np.sin(x)
-            self._parser.add([x, y])
-            sleep(self._speed)
+            t = time() - t1
+            ut = np.sin(t)
+            self._parser.add([t, ut])
+            sleep(self._period)
 
     def check_init(self, port=None, speed=0.2):
         if self.name is not None:
-            self._exit = Event()
-            self._speed = speed
+            self._period = speed
             return True
         else:
             return False
@@ -62,7 +60,7 @@ class RandomSimulator(Process):
             x = time() - t
             y = x
             self._parser.add([x, y])
-            sleep(0.2)
+            sleep(self._speed)
 
     def check_init(self, port=None, speed=0.2):
         if self.name is not None:
@@ -75,6 +73,7 @@ class RandomSimulator(Process):
     def stop(self):
         self._exit.set()
         time.sleep(0.1)
+
 
 
 
