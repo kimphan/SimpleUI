@@ -51,9 +51,10 @@ class Worker(mp.Process):
     def stop(self):
         self.get_plot_value()
         for process in self.plist:
-                if process is not None and process.is_alive():
-                    process.stop()
-                    process.join(1000)
+            print('{}'.format(process))
+            if process is not None and process.is_alive():
+                process.stop()
+                process.join(1000)
 
     def get_plot_value(self):
         while not self._queue.empty():

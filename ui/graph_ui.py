@@ -95,6 +95,8 @@ class GraphUi(QDialog):
         self.stop_btn.setStyleSheet('font-size: 12pt;')
         self.stop_btn.pressed.connect(self.on_stop_event)
 
+        self.enable_ui(True)
+
     # Set timer to update graph every 20 ms
     def _configure_timers(self):
         """
@@ -156,6 +158,7 @@ class GraphUi(QDialog):
             self.enable_ui(False)
 
     def on_stop_event(self):
+        print('stop')
         _worker_rmid = int(self.sender().objectName())
         self._stop(self._timer_plot, self._worker_dict[_worker_rmid])
         self.enable_ui(True)
