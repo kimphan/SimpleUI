@@ -8,7 +8,6 @@
   <component name="ChangeListManager">
     <list default="true" id="3ef897d0-1359-4a6f-b34e-c07635ac1f95" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/processes/serial.py" afterPath="$PROJECT_DIR$/processes/serial.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -356,7 +355,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="change plot" />
     <MESSAGE value="fix worker and parser, serial on going" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix worker and parser, serial on going" />
+    <MESSAGE value="serial(not complete)" />
+    <option name="LAST_COMMIT_MESSAGE" value="serial(not complete)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
