@@ -19,9 +19,12 @@ class Serial(Process):
     def __init__(self, parser):
         Process.__init__(self)
         self._parser = parser
-        self._port = None
-        self._baudrate = None
         self._serial = Serial()
+        self._port = 'COM1' # available serial port (check availability: python -m serial.tools.list_ports)
+        self._baudrate = 19200
+
+    def _check_ports_availability(self):
+        pass
 
     def run(self):
         print('Serial start')
