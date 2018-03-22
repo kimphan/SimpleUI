@@ -6,16 +6,17 @@ Worker: local process
         https://github.com/ssepulveda/RTGraph
         Signal handler: https://docs.python.org/3/library/signal.html
 """
+import multiprocessing as mp
 from helper.parser import *
 from helper.ringBuffer import *
 from processes.simulator import *
 from processes.serial import *
 
 
-class Worker(Process):
+class Worker(mp.Process):
 
     def __init__(self, graph_id=None, samples=500, rate=0.2, port=None):
-        Process.__init__(self)
+        mp.Process.__init__(self)
         self._graphid = graph_id
         self._samples = samples
         self._rate = rate
@@ -25,7 +26,7 @@ class Worker(Process):
         self._parser = None
         self._lines = 0
 
-        self._queue = Queue()
+        self._queue = mp.Queue()
         self._xbuffer = RingBuffer(samples)
         self._ybuffer = [RingBuffer(samples)]
         self.plist = []
@@ -41,13 +42,11 @@ class Worker(Process):
             self._process = SineSimulator(self._parser)
         elif self._graphid == 2:
             self._process = Serial(self._parser)
-        if self._process.check_init() and self._parser.check_init():
+        if self._process.check_init(port=self._port, speed=self._rate) and self._parser.check_init():
             self._parser.start()
             self.plist.append(self._parser)
             self._process.start()
             self.plist.append(self._process)
-        print(str('Simulator pid {}').format(self._process.pid))
-        print(str('Parser pid {}').format(self._parser.pid))
 
     def stop(self):
         self.get_plot_value()
@@ -71,7 +70,6 @@ class Worker(Process):
         return self._ybuffer[i].get_all()
 
     def clear_queue(self,s):
-        print('clear queue')
         self._xbuffer = RingBuffer(s)
         self._ybuffer = []
         for i in range(10):

@@ -8,7 +8,7 @@ class ParserProcessTests(unittest.TestCase):
     def test_fast_consumer(self):
         parser, queue = self._create_parser()
         parser.start()
-        self._create_random_value(parser)
+        parser.add([1,5.5])
         self._stop_parser(parser)
         values = queue.get(False)
 

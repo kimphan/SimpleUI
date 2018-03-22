@@ -6,40 +6,54 @@ Real-Time Graph: local process
         https://docs.python.org/2/library/multiprocessing.html
         https://github.com/ssepulveda/RTGraph
 """
-from multiprocessing import Process, Queue, Event
-from serial import Serial
+import multiprocessing as mp
+import serial
 from serial.tools import list_ports
-import signal, time
+from time import time, sleep
 import numpy as np
 
 
-class Serial(Process):
+class Serial(mp.Process):
 
     # Constructor
-    def __init__(self, parser):
-        Process.__init__(self)
-        self._parser = parser
-        self._serial = Serial()
-        self._port = 'COM1' # available serial port (check availability: python -m serial.tools.list_ports)
-        self._baudrate = 19200
+    def __init__(self, prser):
+        mp.Process.__init__(self)
+        self._parser = prser
+        self._exit = mp.Event()
+        self._serial = serial.Serial()
 
-    def _check_ports_availability(self):
-        pass
+    @staticmethod
+    def _is_ports_available(port):
+        for p in list(list_ports.comports()):
+            if p.device == port:
+                return True
 
     def run(self):
-        print('Serial start')
+        t1 = time()
+        if self._is_ports_available(self._serial.port):
+            if not self._serial.is_open:
+                self._serial.open()
+                t = time() - t1
+                while not self._exit.is_set():
+                    print(self._serial.readline())
+                # self._parser.add([t, self._serial.readline()])
+                self._serial.close()
+        else:
+            print('Port is not available.')
 
-    def check_init(self, port=None, speed=0.2):
+    def check_init(self, port=None, speed=115200):
         if self.name is not None:
-            self._exit = Event()
-            self._baudrate = speed
-            self._port = port
+            self._serial.port = port
+            self._serial.baudrate = int(speed)
+            self._serial.stopbits = serial.STOPBITS_ONE
+            self._serial.bytesize = serial.EIGHTBITS
+            self._serial.timeout = 0
             return True
         else:
             return False
 
     def stop(self):
-        self.terminate()
+        self._exit.set()
 
 
 
