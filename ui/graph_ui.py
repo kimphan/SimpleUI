@@ -20,24 +20,10 @@ class GraphUi(QDialog):
         # Plot Config
         self._plot_config(yname, xname,key)
 
-        # Display Setup
-        self.sample_num = QLineEdit()
-        self.sample_num.setText('500')
-        self.rate_num = QLineEdit()
-        self.rate_num.setText('0.2')
-        self.serial_port = QLineEdit()
+        # Initial setup input
+        self._setup_config(i)
 
-        self.run_btn = QPushButton('Run')
-        self.run_btn.setObjectName('run')
-        self.run_btn.setStyleSheet('font-size: 12pt;')
-        self.run_btn.pressed.connect(lambda: self.on_run_event(i))
-
-        self.stop_btn = QPushButton('Stop')
-        self.stop_btn.setObjectName('stop')
-        self.stop_btn.setStyleSheet('font-size: 12pt;')
-        self.stop_btn.pressed.connect(self.on_stop_event)
-
-
+        # Qt Display
         layout = QHBoxLayout()
         layout.addWidget(self.stop_btn)
         layout.addWidget(self.run_btn)
@@ -49,7 +35,7 @@ class GraphUi(QDialog):
 
         graph_widget = QGroupBox(title)
         graph_widget.setObjectName(str(key))
-        graph_widget.setStyleSheet('font-size: 15pt; font-style: bold; color: 606060;')
+        graph_widget.setStyleSheet('font-size: 12pt; font-style: bold; color: 606060;')
         graph_widget.setFixedHeight(height/3)
         graph_widget.setMinimumWidth(width*4/5)
 
@@ -61,7 +47,6 @@ class GraphUi(QDialog):
         sub_layout = QFormLayout()
         sub_layout.setAlignment(Qt.AlignRight)
         sub_layout.addRow(str('Sample: '), self.sample_num)
-
         if i==2:
 
             sub_layout.addRow(str('Baurate: '), self.rate_num)
@@ -91,19 +76,35 @@ class GraphUi(QDialog):
         self.plot_widget.plotItem.showGrid(True, True, 0.7)
         self.pen = pg.mkPen(self.color_dict[key-1], width=3, style=None)
 
+    def _setup_config(self, i):
+        self.sample_num = QLineEdit()
+        self.sample_num.setText('500')
+        self.rate_num = QLineEdit()
+        self.rate_num.setText('0.2')
+        self.serial_port = QLineEdit()
+
+        self.run_btn = QPushButton('Run')
+        self.run_btn.setObjectName('run')
+        self.run_btn.setStyleSheet('font-size: 12pt;')
+        self.run_btn.pressed.connect(lambda: self.on_run_event(i))
+
+        self.stop_btn = QPushButton('Stop')
+        self.stop_btn.setObjectName('stop')
+        self.stop_btn.setStyleSheet('font-size: 12pt;')
+        self.stop_btn.pressed.connect(self.on_stop_event)
+
     # Set timer to update graph every 20 ms
     def _configure_timers(self):
         """
         Configures specific elements of the QTimers.
         :return:
         """
-        self._timer_plot = QTimer(self)
+        self._timer_plot = QTimer()
         self._timer_plot.timeout.connect(self._update_plot)
 
     def _update_plot(self):
         self.worker.get_plot_value()
         self.plot_widget.plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(), pen=self.pen)
-
 
     def make_connection(self, _object_):
         _object_.add_button.connect(self.display)
@@ -148,9 +149,6 @@ class GraphUi(QDialog):
         self.worker.start()
         if self.worker.is_alive():
             self._timer_plot.start(20)
-        else:
-            print('worker not start')
-        print(str('Worker pid {}').format(self.worker.pid))
 
     def on_stop_event(self):
         self.run_btn.setEnabled(True)
@@ -159,8 +157,7 @@ class GraphUi(QDialog):
         self.enable_ui(True)
 
     def enable_ui(self, e):
-        self.sample_num.setEnabled(e)
-        self.rate_num.setEnabled(e)
+        self.rate_num.setEnabled(not e)
         self.serial_port.setEnabled(e)
         self.run_btn.setEnabled(e)
         self.stop_btn.setEnabled(not e)

@@ -26,7 +26,6 @@ class Serial(Process):
     def run(self):
         print('Serial start')
 
-
     def check_init(self, port=None, speed=0.2):
         if self.name is not None:
             self._exit = Event()
@@ -38,7 +37,6 @@ class Serial(Process):
 
     def stop(self):
         self.terminate()
-        time.sleep(0.1)
 
 
 

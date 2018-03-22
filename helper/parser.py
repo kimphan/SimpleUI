@@ -6,36 +6,38 @@ Parser: local process
         https://github.com/ssepulveda/RTGraph
 """
 import signal, time
-from multiprocessing import Process, Queue, Event, Manager
+import multiprocessing as mp
 
 
-class Parser(Process):
+class Parser(mp.Process):
 
     def __init__(self, data, samples, rate):
-        Process.__init__(self)
-        self._importQ = data
+        mp.Process.__init__(self)
+        self._importQ = mp.Queue()
         self._sample = samples
         self._rate = rate
-        self._exportQ = Queue()
+        self._exportQ = data
         self.count = 0
-        self._exit = Event()
-
-    def run(self):
-        self.dequeue()
-
-    def stop(self):
-        self._exit.set()
-        time.sleep(0.1)
-
-    def add(self, data):
-        self._importQ.put(data)
+        self._exit = mp.Event()
 
     def check_init(self):
         return self.name is not None
 
-    def dequeue(self):
+    def run(self):
+        while not self._exit.is_set():
+            self._parse_data()
+            time.sleep(0.005)
+        self._parse_data()
+
+    def stop(self):
+        self._exit.set()
+
+    def add(self, data):
+        self._importQ.put(data)
+
+    def _parse_data(self):
         while not self._importQ.empty():
-            self._exportQ = self._importQ.get()
+            self._exportQ.put(self._importQ.get(timeout=0.05))
 
 
 
