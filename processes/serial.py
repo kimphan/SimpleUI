@@ -32,13 +32,15 @@ class Serial(mp.Process):
         t1 = time()
         if self._is_ports_available(self._serial.port):
             if not self._serial.is_open:
-                self._serial.open()
-                t = time() - t1
-                print(self._exit.is_set())
-                while not self._exit.is_set():
-                    print(self._serial.readline())
-                    # self._parser.add([t, self._serial.readline()])
-                self._serial.close()
+                try:
+                    self._serial.open()
+                    t = time() - t1
+                    while not self._exit.is_set():
+                        line = self._serial.readline()
+                        self._parser.add([t, line])
+                    self._serial.close()
+                except serial.SerialException:
+                    self._serial.close()
         else:
             print('Port is not available.')
 

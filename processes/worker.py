@@ -51,7 +51,6 @@ class Worker(mp.Process):
     def stop(self):
         self.get_plot_value()
         for process in self.plist:
-            print('{}'.format(process))
             if process is not None and process.is_alive():
                 process.stop()
                 process.join(1000)
@@ -62,7 +61,20 @@ class Worker(mp.Process):
 
     def distribute_values(self, data):
         self._xbuffer.append(data[0])
-        self._ybuffer[0].append(data[1])
+        self.split_channel_values(data[1])
+
+    def split_channel_values(self, sig_data):
+        channel_num = len(sig_data)
+        if self._lines < channel_num:
+            if channel_num > 5:
+                self._lines = 5
+            else:
+                self._lines = channel_num
+        for i in range(self._lines):
+            self._ybuffer[i].append(sig_data[i])
+
+    def get_channel_num(self):
+        return self._lines
 
     def getxbuffer(self):
         return self._xbuffer.get_all()
@@ -73,7 +85,7 @@ class Worker(mp.Process):
     def clear_queue(self,s):
         self._xbuffer = RingBuffer(s)
         self._ybuffer = []
-        for i in range(10):
+        for i in range(5):
             self._ybuffer.append(RingBuffer(s))
         while not self._queue.empty():
             self._queue.get()

@@ -13,7 +13,7 @@ class GraphUi(QDialog):
         super(GraphUi,self).__init__()
         self.channel_dict = dict()
         self._worker_dict = dict()
-        self.color_dict = ({0:'#6c6d70',1:'#EB340D',2:'#0D46EB'})
+        self.color_dict = ({0:'#6c6d70',1:'#EB340D',2:'#0D46EB', 3:'#d01bd3', 4:'#ed9615'})
         self.add = 0
 
     def addgraph(self, width, height, i, key, xname, yname, title):
@@ -74,7 +74,6 @@ class GraphUi(QDialog):
         self.plot_widget.setLabel('left', yname)
         self.plot_widget.setLabel('bottom', xname)
         self.plot_widget.plotItem.showGrid(True, True, 0.7)
-        self.pen = pg.mkPen(self.color_dict[key-1], width=3, style=None)
 
     def _setup_config(self, i, key):
         self.sample_num = QLineEdit()
@@ -108,7 +107,15 @@ class GraphUi(QDialog):
 
     def _update_plot(self):
         self._worker.get_plot_value()
-        self.plot_widget.plotItem.plot(self._worker.getxbuffer(), self._worker.getybuffer(0), pen=self.pen)
+        self.plot_widget.plotItem.clear()
+        channel = self._worker.get_channel_num()
+
+        for i in range(channel):
+            self.display_plot(self._worker.getxbuffer(), self._worker.getybuffer(i), i)
+
+    def display_plot(self, x, y, p):
+        pen = pg.mkPen(self.color_dict[p], width=3, style=None)
+        self.plot_widget.plotItem.plot(x,y, pen=pen)
 
     def make_connection(self, _object_):
         _object_.add_button.connect(self.display)
@@ -158,7 +165,6 @@ class GraphUi(QDialog):
             self.enable_ui(False)
 
     def on_stop_event(self):
-        print('stop')
         _worker_rmid = int(self.sender().objectName())
         self._stop(self._timer_plot, self._worker_dict[_worker_rmid])
         self.enable_ui(True)

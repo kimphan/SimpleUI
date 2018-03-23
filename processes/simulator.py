@@ -30,7 +30,7 @@ class SineSimulator(mp.Process):
         while not self._exit.is_set():
             t = float(time() - t1)
             ut = float(np.sin(w*t))
-            self._parser.add([t, ut])
+            self._parser.add([t, str('{}\r\n'.format(ut)).encode("utf-8")])
             sleep(self._period)
 
     def check_init(self, port=None, speed=0.2):
@@ -42,8 +42,6 @@ class SineSimulator(mp.Process):
 
     def stop(self):
         self._exit.set()
-        sleep(0.1)
-
 
 class RandomSimulator(mp.Process):
 
@@ -59,7 +57,7 @@ class RandomSimulator(mp.Process):
         while not self._exit.is_set():
             x = time() - t
             y = x
-            self._parser.add([x, y])
+            self._parser.add([x, str('{}\r\n'.format(y)).encode("utf-8")])
             sleep(self._speed)
 
     def check_init(self, port=None, speed=0.2):
