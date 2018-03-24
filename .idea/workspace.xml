@@ -10,7 +10,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/helper/parser.py" afterPath="$PROJECT_DIR$/helper/parser.py" />
-      <change beforePath="$PROJECT_DIR$/processes/serial.py" afterPath="$PROJECT_DIR$/processes/serial.py" />
       <change beforePath="$PROJECT_DIR$/processes/simulator.py" afterPath="$PROJECT_DIR$/processes/simulator.py" />
       <change beforePath="$PROJECT_DIR$/processes/worker.py" afterPath="$PROJECT_DIR$/processes/worker.py" />
       <change beforePath="$PROJECT_DIR$/ui/graph_ui.py" afterPath="$PROJECT_DIR$/ui/graph_ui.py" />
@@ -27,8 +26,8 @@
       <file leaf-file-name="serial.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/processes/serial.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="349">
-              <caret line="40" column="40" lean-forward="true" selection-start-line="40" selection-start-column="40" selection-end-line="40" selection-end-column="40" />
+            <state relative-caret-position="561">
+              <caret line="51" column="52" lean-forward="true" selection-start-line="51" selection-start-column="52" selection-end-line="51" selection-end-column="52" />
               <folding>
                 <element signature="e#212#240#0" expanded="true" />
               </folding>
@@ -39,8 +38,8 @@
       <file leaf-file-name="parser.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/helper/parser.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="453">
-              <caret line="53" column="30" lean-forward="true" selection-start-line="53" selection-start-column="30" selection-end-line="53" selection-end-column="30" />
+            <state relative-caret-position="113">
+              <caret line="21" column="0" lean-forward="true" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
               <folding>
                 <element signature="e#195#214#0" expanded="true" />
               </folding>
@@ -48,11 +47,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="worker.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="worker.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/processes/worker.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="901">
-              <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+            <state relative-caret-position="357">
+              <caret line="30" column="26" lean-forward="false" selection-start-line="30" selection-start-column="26" selection-end-line="30" selection-end-column="26" />
               <folding>
                 <element signature="e#301#329#0" expanded="true" />
               </folding>
@@ -60,32 +59,49 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="graph_ui.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="simulator.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/processes/simulator.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="323">
+              <caret line="39" column="18" lean-forward="true" selection-start-line="39" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="119">
+              <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="2" selection-end-line="8" selection-end-column="23" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="graph_ui.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ui/graph_ui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="521">
-              <caret line="118" column="0" lean-forward="true" selection-start-line="118" selection-start-column="0" selection-end-line="118" selection-end-column="0" />
+            <state relative-caret-position="493">
+              <caret line="165" column="0" lean-forward="true" selection-start-line="165" selection-start-column="0" selection-end-line="165" selection-end-column="0" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
-                <element signature="e#275#488#0" expanded="false" />
-                <element signature="e#566#2308#0" expanded="false" />
-                <element signature="e#2680#3387#0" expanded="false" />
-                <element signature="e#3474#3655#0" expanded="false" />
-                <element signature="e#4251#5643#0" expanded="false" />
-                <element signature="e#5708#6213#0" expanded="false" />
-                <element signature="e#6855#7046#0" expanded="false" />
+                <element signature="e#2699#3406#0" expanded="false" />
+                <element signature="e#4273#5665#0" expanded="false" />
+                <element signature="e#6303#6448#0" expanded="false" />
+                <element signature="e#6906#7097#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/main.py">
+      <file leaf-file-name="mainwindow_ui.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ui/mainwindow_ui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="20" column="21" lean-forward="false" selection-start-line="20" selection-start-column="21" selection-end-line="20" selection-end-column="21" />
+            <state relative-caret-position="204">
+              <caret line="12" column="30" lean-forward="true" selection-start-line="12" selection-start-column="30" selection-end-line="12" selection-end-column="30" />
               <folding>
-                <element signature="e#1#11#0" expanded="true" />
+                <element signature="e#0#29#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -124,11 +140,12 @@
         <option value="$PROJECT_DIR$/test/parser_test.py" />
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/ui/mainwindow_ui.py" />
-        <option value="$PROJECT_DIR$/processes/simulator.py" />
-        <option value="$PROJECT_DIR$/ui/graph_ui.py" />
         <option value="$PROJECT_DIR$/processes/serial.py" />
+        <option value="$PROJECT_DIR$/processes/simulator.py" />
         <option value="$PROJECT_DIR$/helper/parser.py" />
+        <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/processes/worker.py" />
+        <option value="$PROJECT_DIR$/ui/graph_ui.py" />
       </list>
     </option>
   </component>
@@ -233,6 +250,24 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="SimpleUI" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
     <configuration name="Unittests for parser_test.ParserProcessTests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -261,34 +296,20 @@
       <option name="_new_target" value="&quot;parser_test.ParserProcessTests.test_fast_consumer&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
     </configuration>
-    <configuration name="Unittests for worker_test.WorkerTests.test_one" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="SimpleUI" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;worker_test.WorkerTests.test_one&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-    </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests for parser_test.ParserProcessTests.test_fast_consumer" />
       <item index="1" class="java.lang.String" itemvalue="Python.main" />
-      <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests for worker_test.WorkerTests.test_one" />
-      <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests for parser_test.ParserProcessTests" />
-      <item index="4" class="java.lang.String" itemvalue="Python.graph_ui" />
+      <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests for parser_test.ParserProcessTests" />
+      <item index="3" class="java.lang.String" itemvalue="Python.graph_ui" />
+      <item index="4" class="java.lang.String" itemvalue="Python.test" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python.main" />
-        <item index="1" class="java.lang.String" itemvalue="Python.graph_ui" />
-        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests for parser_test.ParserProcessTests.test_fast_consumer" />
-        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests for parser_test.ParserProcessTests" />
-        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests for worker_test.WorkerTests.test_one" />
+        <item index="1" class="java.lang.String" itemvalue="Python.test" />
+        <item index="2" class="java.lang.String" itemvalue="Python.graph_ui" />
+        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests for parser_test.ParserProcessTests.test_fast_consumer" />
+        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests for parser_test.ParserProcessTests" />
       </list>
     </recent_temporary>
   </component>
@@ -374,15 +395,70 @@
     <MESSAGE value="serial(not complete)" />
     <MESSAGE value="serial.readline() not read any data" />
     <MESSAGE value="serial.readline() read any data not yet display" />
-    <option name="LAST_COMMIT_MESSAGE" value="serial.readline() read any data not yet display" />
+    <MESSAGE value="parser error" />
+    <option name="LAST_COMMIT_MESSAGE" value="parser error" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="19" />
+      <option name="time" value="20" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/processes/serial.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="612">
+          <caret line="40" column="40" lean-forward="true" selection-start-line="40" selection-start-column="40" selection-end-line="40" selection-end-column="40" />
+          <folding>
+            <element signature="e#212#240#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/helper/parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="884">
+          <caret line="53" column="30" lean-forward="true" selection-start-line="53" selection-start-column="30" selection-end-line="53" selection-end-column="30" />
+          <folding>
+            <element signature="e#195#214#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/graph_ui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="646">
+          <caret line="118" column="0" lean-forward="true" selection-start-line="118" selection-start-column="0" selection-end-line="118" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+            <element signature="e#2699#3406#0" expanded="false" />
+            <element signature="e#4273#5665#0" expanded="false" />
+            <element signature="e#6303#6448#0" expanded="false" />
+            <element signature="e#6906#7097#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="20" column="21" lean-forward="false" selection-start-line="20" selection-start-column="21" selection-end-line="20" selection-end-column="21" />
+          <folding>
+            <element signature="e#1#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/processes/worker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="884">
+          <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+          <folding>
+            <element signature="e#301#329#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/processes/serial.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -419,13 +495,10 @@
           <caret line="162" column="37" lean-forward="false" selection-start-line="162" selection-start-column="37" selection-end-line="162" selection-end-column="37" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#275#488#0" expanded="false" />
-            <element signature="e#566#2308#0" expanded="false" />
-            <element signature="e#2680#3387#0" expanded="false" />
-            <element signature="e#3474#3655#0" expanded="false" />
-            <element signature="e#4251#5643#0" expanded="false" />
-            <element signature="e#5708#6213#0" expanded="false" />
-            <element signature="e#6855#7046#0" expanded="false" />
+            <element signature="e#2699#3406#0" expanded="false" />
+            <element signature="e#4273#5665#0" expanded="false" />
+            <element signature="e#6303#6448#0" expanded="false" />
+            <element signature="e#6906#7097#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -476,13 +549,10 @@
           <caret line="162" column="37" lean-forward="true" selection-start-line="162" selection-start-column="37" selection-end-line="162" selection-end-column="37" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#275#488#0" expanded="false" />
-            <element signature="e#566#2308#0" expanded="false" />
-            <element signature="e#2680#3387#0" expanded="false" />
-            <element signature="e#3474#3655#0" expanded="false" />
-            <element signature="e#4251#5643#0" expanded="false" />
-            <element signature="e#5708#6213#0" expanded="false" />
-            <element signature="e#6855#7046#0" expanded="false" />
+            <element signature="e#2699#3406#0" expanded="false" />
+            <element signature="e#4273#5665#0" expanded="false" />
+            <element signature="e#6303#6448#0" expanded="false" />
+            <element signature="e#6906#7097#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -533,13 +603,10 @@
           <caret line="155" column="25" lean-forward="true" selection-start-line="155" selection-start-column="25" selection-end-line="155" selection-end-column="25" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#275#488#0" expanded="false" />
-            <element signature="e#566#2308#0" expanded="false" />
-            <element signature="e#2680#3387#0" expanded="false" />
-            <element signature="e#3474#3655#0" expanded="false" />
-            <element signature="e#4251#5643#0" expanded="false" />
-            <element signature="e#5708#6213#0" expanded="false" />
-            <element signature="e#6855#7046#0" expanded="false" />
+            <element signature="e#2699#3406#0" expanded="false" />
+            <element signature="e#4273#5665#0" expanded="false" />
+            <element signature="e#6303#6448#0" expanded="false" />
+            <element signature="e#6906#7097#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -584,13 +651,10 @@
           <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#275#488#0" expanded="false" />
-            <element signature="e#566#2308#0" expanded="false" />
-            <element signature="e#2680#3387#0" expanded="false" />
-            <element signature="e#3474#3655#0" expanded="false" />
-            <element signature="e#4251#5643#0" expanded="false" />
-            <element signature="e#5708#6213#0" expanded="false" />
-            <element signature="e#6855#7046#0" expanded="false" />
+            <element signature="e#2699#3406#0" expanded="false" />
+            <element signature="e#4273#5665#0" expanded="false" />
+            <element signature="e#6303#6448#0" expanded="false" />
+            <element signature="e#6906#7097#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -638,13 +702,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ui/mainwindow_ui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="253">
-          <caret line="41" column="46" lean-forward="true" selection-start-line="41" selection-start-column="46" selection-end-line="41" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/parser_test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
@@ -656,49 +713,39 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="289">
           <caret line="262" column="26" lean-forward="true" selection-start-line="262" selection-start-column="26" selection-end-line="262" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="2" selection-end-line="8" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/processes/simulator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="39" column="18" lean-forward="true" selection-start-line="39" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="20" column="21" lean-forward="false" selection-start-line="20" selection-start-column="21" selection-end-line="20" selection-end-column="21" />
+        <state relative-caret-position="459">
+          <caret line="27" column="0" lean-forward="true" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
           <folding>
             <element signature="e#1#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ui/graph_ui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="521">
-          <caret line="118" column="0" lean-forward="true" selection-start-line="118" selection-start-column="0" selection-end-line="118" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#275#488#0" expanded="false" />
-            <element signature="e#566#2308#0" expanded="false" />
-            <element signature="e#2680#3387#0" expanded="false" />
-            <element signature="e#3474#3655#0" expanded="false" />
-            <element signature="e#4251#5643#0" expanded="false" />
-            <element signature="e#5708#6213#0" expanded="false" />
-            <element signature="e#6855#7046#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/processes/simulator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="33" column="31" lean-forward="true" selection-start-line="33" selection-start-column="31" selection-end-line="33" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/processes/serial.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="40" column="40" lean-forward="true" selection-start-line="40" selection-start-column="40" selection-end-line="40" selection-end-column="40" />
+        <state relative-caret-position="561">
+          <caret line="51" column="52" lean-forward="true" selection-start-line="51" selection-start-column="52" selection-end-line="51" selection-end-column="52" />
           <folding>
             <element signature="e#212#240#0" expanded="true" />
           </folding>
@@ -707,20 +754,44 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/helper/parser.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="453">
-          <caret line="53" column="30" lean-forward="true" selection-start-line="53" selection-start-column="30" selection-end-line="53" selection-end-column="30" />
+        <state relative-caret-position="113">
+          <caret line="21" column="0" lean-forward="true" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
           <folding>
             <element signature="e#195#214#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/ui/mainwindow_ui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="12" column="30" lean-forward="true" selection-start-line="12" selection-start-column="30" selection-end-line="12" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/processes/worker.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="901">
-          <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+        <state relative-caret-position="357">
+          <caret line="30" column="26" lean-forward="false" selection-start-line="30" selection-start-column="26" selection-end-line="30" selection-end-column="26" />
           <folding>
             <element signature="e#301#329#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ui/graph_ui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="165" column="0" lean-forward="true" selection-start-line="165" selection-start-column="0" selection-end-line="165" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+            <element signature="e#2699#3406#0" expanded="false" />
+            <element signature="e#4273#5665#0" expanded="false" />
+            <element signature="e#6303#6448#0" expanded="false" />
+            <element signature="e#6906#7097#0" expanded="false" />
           </folding>
         </state>
       </provider>

@@ -50,7 +50,7 @@ class Parser(mp.Process):
                 else:
                     raise TypeError
                 values = [float(v) for v in values]
-                self._exportQ.put([t, values])
+                self._exportQ.put((t, values))
             except ValueError:
                 print('Value Error')
             except AttributeError:

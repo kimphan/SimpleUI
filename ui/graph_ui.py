@@ -15,6 +15,7 @@ class GraphUi(QDialog):
         self._worker_dict = dict()
         self.color_dict = ({0:'#6c6d70',1:'#EB340D',2:'#0D46EB', 3:'#d01bd3', 4:'#ed9615'})
         self.add = 0
+        self.f = 0
 
     def addgraph(self, width, height, i, key, xname, yname, title):
         # Plot Config
@@ -102,14 +103,13 @@ class GraphUi(QDialog):
         Configures specific elements of the QTimers.
         :return:
         """
-        self._timer_plot = QTimer()
+        self._timer_plot = QTimer(self)
         self._timer_plot.timeout.connect(self._update_plot)
 
     def _update_plot(self):
         self._worker.get_plot_value()
         self.plot_widget.plotItem.clear()
         channel = self._worker.get_channel_num()
-
         for i in range(channel):
             self.display_plot(self._worker.getxbuffer(), self._worker.getybuffer(i), i)
 
@@ -152,17 +152,17 @@ class GraphUi(QDialog):
 
     # Run button Handler
     def on_run_event(self,i):
-        p = self.serial_port.currentText()
         _worker_addid = int(self.sender().objectName())
         self._worker = Worker(graph_id= i,
                              samples=int(self.sample_num.text()),
                              rate=float(self.rate_num.text()),
-                             port=p)
-        self._worker.start()
+                             port=self.serial_port.currentText())
+        print('{}'.format(self._worker.start()))
         if self._worker.is_alive():
             self._timer_plot.start(20)
             self._worker_dict.update({_worker_addid: self._worker})
             self.enable_ui(False)
+            self.f = 1
 
     def on_stop_event(self):
         _worker_rmid = int(self.sender().objectName())
