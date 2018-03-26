@@ -40,8 +40,8 @@ class ExampleUI (QMainWindow):
 
         # Graph type list for displaying option
         self.graph_type.addItem('Random Plot')
-        self.graph_type.addItem('Sine wave Simulator')
-        self.graph_type.addItem('Serial Channel')
+        self.graph_type.addItem('Sine Simulator')
+        self.graph_type.addItem('Serial')
 
         vertical_menu = QVBoxLayout()
         vertical_menu.setAlignment(Qt.AlignLeft)

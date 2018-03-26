@@ -10,27 +10,28 @@ Simulator: local process
         https://docs.python.org/2/library/multiprocessing.html
         https://github.com/ssepulveda/RTGraph
 """
-from multiprocessing import Process, Queue, Event
+import multiprocessing as mp
 from time import time, sleep
-import signal
 import numpy as np
 
 
-class SineSimulator(Process):
+class SineSimulator(mp.Process):
 
     # Constructor
     def __init__(self, parser):
-        Process.__init__(self)
+        mp.Process.__init__(self)
         self._parser = parser
-        self._exit = Event()
-        self._speed = None
+        self._exit = mp.Event()
+        self._period = None
 
     def run(self):
         t1 = time()
+        w = 2*np.pi/self._period
         while not self._exit.is_set():
             t = time() - t1
-            ut = np.sin(t)
-            self._parser.add([t, ut])
+            sint = np.sin(w*t)
+            cost = np.cos(w*t)
+            self._parser.add([t, str('{},{}\r\n'.format(sint, cost)).encode("utf-8")])
             sleep(self._period)
 
     def check_init(self, port=None, speed=0.2):
@@ -42,29 +43,26 @@ class SineSimulator(Process):
 
     def stop(self):
         self._exit.set()
-        time.sleep(0.1)
 
-
-class RandomSimulator(Process):
+class RandomSimulator(mp.Process):
 
     # Constructor
     def __init__(self, parser):
-        Process.__init__(self)
+        mp.Process.__init__(self)
         self._parser = parser
         self._speed = None
-        self._exit = Event()
+        self._exit = mp.Event()
 
     def run(self):
         t = time()
         while not self._exit.is_set():
             x = time() - t
             y = x
-            self._parser.add([x, y])
+            self._parser.add([x, str('{}\r\n'.format(y)).encode("utf-8")])
             sleep(self._speed)
 
     def check_init(self, port=None, speed=0.2):
         if self.name is not None:
-            self._exit = Event()
             self._speed = speed
             return True
         else:
@@ -72,7 +70,6 @@ class RandomSimulator(Process):
 
     def stop(self):
         self._exit.set()
-        time.sleep(0.1)
 
 
 
