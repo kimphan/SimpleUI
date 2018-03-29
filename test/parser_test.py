@@ -1,14 +1,13 @@
 import unittest
 import numpy as np
 from multiprocessing import Queue
-from helper.parser import *
-
+from processes.parser import *
 
 class ParserProcessTests(unittest.TestCase):
     def test_fast_consumer(self):
         parser, queue = self._create_parser()
         parser.start()
-        parser.add([1,5.5])
+        self._create_random_value(parser)
         self._stop_parser(parser)
         values = queue.get(False)
 
@@ -29,8 +28,9 @@ class ParserProcessTests(unittest.TestCase):
     def _create_random_value(p):
         x = np.linspace(0,360)
         for i in x:
-            y = np.sin(2*np.pi/180*i)
-            p.add([x,y])
+            sin = np.sin(2*np.pi/180*i)
+            cos = np.cos(2*np.pi/180*i)
+            p.add([x, str('{},{}').format(sin,cos)])
 
 
 if __name__ == '__main__':

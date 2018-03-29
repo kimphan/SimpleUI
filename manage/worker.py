@@ -1,22 +1,20 @@
 """
-Worker: local process
+Worker:
     Role: connect between data computation process and data parsing process
     References:
         https://docs.python.org/2/library/multiprocessing.html
+    Credit for:
         https://github.com/ssepulveda/RTGraph
-        Signal handler: https://docs.python.org/3/library/signal.html
 """
-import multiprocessing as mp
-from helper.parser import *
+from processes.parser import *
 from helper.ringBuffer import *
 from processes.simulator import *
 from processes.serial import *
 
 
-class Worker(mp.Process):
+class Worker:
 
-    def __init__(self, graph_id=None, samples=500, rate=0.2, port=None):
-        mp.Process.__init__(self)
+    def __init__(self, graph_id=None, samples=500, rate=0.02, port=None):
         self._graphid = graph_id
         self._samples = samples
         self._rate = rate
@@ -27,14 +25,14 @@ class Worker(mp.Process):
         self._lines = 0
 
         self._queue = mp.Queue()
-        self._xbuffer = RingBuffer(samples)
-        self._ybuffer = []
-        self.tempbuff = RingBuffer(samples)
-        self.plist = []
+        self._xbuffer = None
+        self._ybuffer = None
+        self.plist = None
 
-    def run(self):
-        if self.clear_queue(self._samples):
-            print('worker start {}'.format(len(self._ybuffer)))
+    def start(self):
+        # Reset and Initialize buffers data
+        self._xbuffer, self._ybuffer, self._queue = self.clear_queue(self._samples,self._queue)
+        self.plist = []
         self._parser = Parser(data=self._queue,
                               samples=self._samples,
                               rate=self._rate)
@@ -61,26 +59,21 @@ class Worker(mp.Process):
                 process.join(1000)
 
     def get_plot_value(self):
-        print('get_plot {}'.format(len(self._ybuffer)))
         while not self._queue.empty():
             self.distribute_values(self._queue.get_nowait())
 
     def distribute_values(self, data):
-        print('distribute_values {}'.format(len(self._ybuffer)))
         self._xbuffer.append(data[0])
         temp = data[1]
-        self.tempbuff.append(temp[0])
         channel_num = len(temp)
         if self._lines < channel_num:
             if channel_num > 5:
                 self._lines = 5
             else:
                 self._lines = channel_num
-        # try:
-        #     for c in range(self._lines):
-        #         self._ybuffer[c].append(temp[c])
-        # except:
-        #     print('error {}'.format(self._lines))
+        for c in range(self._lines):
+            self._ybuffer[c].append(temp[c])
+
 
     def get_channel_num(self):
         return self._lines
@@ -89,17 +82,21 @@ class Worker(mp.Process):
         return self._xbuffer.get_all()
 
     def getybuffer(self, i):
-        return self.tempbuff.get_all()
+        return self._ybuffer[i].get_all()
 
-    def clear_queue(self, s):
-        self.tempbuff = RingBuffer(s)
-        self._xbuffer = RingBuffer(s)
-        self._ybuffer = []
-        for i in range(5):
-            self._ybuffer.append(RingBuffer(s))
-        while not self._queue.empty():
-            self._queue.get()
-        return True
+    def is_running(self):
+        return self._process is not None and self._process.is_alive()
 
+    @staticmethod
+    def clear_queue(s,q):
+        x = RingBuffer(s)
+        y = []
+        i = 0
+        while i < 5:
+            y.append(RingBuffer(s))
+            i += 1
+        while not q.empty():
+            q.get()
+        return x, y, q
 
 

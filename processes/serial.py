@@ -4,13 +4,14 @@ Real-Time Graph: local process
     Role: data computation for Sine Wave graph
     References:
         https://docs.python.org/2/library/multiprocessing.html
+    Credit for:
         https://github.com/ssepulveda/RTGraph
 """
+import platform, glob
 import multiprocessing as mp
 import serial
-from serial.tools import list_ports
-from time import time, sleep
-import numpy as np
+from helper.serial_scanner import SerialScan
+from time import time
 
 
 class Serial(mp.Process):
@@ -21,12 +22,13 @@ class Serial(mp.Process):
         self._parser = prser
         self._exit = mp.Event()
         self._serial = serial.Serial()
+        self._os = SerialScan()
 
-    @staticmethod
-    def _is_ports_available(port):
-        for p in list(list_ports.comports()):
-            if p.device == port:
+    def _is_ports_available(self, port):
+        for p in self._os._scan_serial_port():
+            if port in p:
                 return True
+        return False
 
     def run(self):
         t1 = time()
@@ -40,6 +42,7 @@ class Serial(mp.Process):
                         self._parser.add([t, line])
                     self._serial.close()
                 except serial.SerialException:
+                    print('cant open port')
                     self._serial.close()
         else:
             print('Port is not available.')

@@ -1,10 +1,10 @@
+"""
+Credit for:
+    http://code.activestate.com/recipes/68429-ring-buffer/
+    http://stackoverflow.com/questions/4151320/efficient-circular-buffer
+    https://github.com/ssepulveda/RTGraph
+"""
 import numpy as np
-
-"""
-http://code.activestate.com/recipes/68429-ring-buffer/
-http://stackoverflow.com/questions/4151320/efficient-circular-buffer
-"""
-
 
 class RingBuffer(object):
     def __init__(self, size_max, default_value=0.0, dtype=float):

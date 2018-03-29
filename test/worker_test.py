@@ -1,7 +1,7 @@
 import unittest
 from time import sleep
 
-from processes.worker import Worker
+from manage.worker import Worker
 
 
 class WorkerTests(unittest.TestCase):
@@ -18,15 +18,14 @@ class WorkerTests(unittest.TestCase):
                         samples=500,
                         rate=0.2,
                         port=None)
-        worker.start()
+        worker.run()
         sleep(time)
         worker.stop()
         worker.get_plot_value()
 
         for v in worker.getybuffer(0):
-            if v == 0:
-                zeros += 1
-        print(zeros)
+            print(v)
+
         # if 0 < zeros <= ((samples_plus_error - samples) * 2):
         #     passed = True
         # self.assertTrue(passed)

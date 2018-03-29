@@ -26,7 +26,7 @@ class SineSimulator(mp.Process):
 
     def run(self):
         t1 = time()
-        w = 2*np.pi/self._period
+        w = 2 * np.pi / self._period
         while not self._exit.is_set():
             t = time() - t1
             sint = np.sin(w*t)
@@ -34,7 +34,7 @@ class SineSimulator(mp.Process):
             self._parser.add([t, str('{},{}\r\n'.format(sint, cost)).encode("utf-8")])
             sleep(self._period)
 
-    def check_init(self, port=None, speed=0.2):
+    def check_init(self, port, speed):
         if self.name is not None:
             self._period = speed
             return True
@@ -61,7 +61,7 @@ class RandomSimulator(mp.Process):
             self._parser.add([x, str('{}\r\n'.format(y)).encode("utf-8")])
             sleep(self._speed)
 
-    def check_init(self, port=None, speed=0.2):
+    def check_init(self, port, speed):
         if self.name is not None:
             self._speed = speed
             return True

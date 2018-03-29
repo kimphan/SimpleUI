@@ -3,6 +3,7 @@ Parser: local process
     Role: access the data queue locally
     References:
         https://docs.python.org/2/library/multiprocessing.html
+    Credit for:
         https://github.com/ssepulveda/RTGraph
 """
 import signal, time

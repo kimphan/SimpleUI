@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import *
 from PyQt5.Qt import Qt
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QTimer
-from processes.worker import Worker
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from helper.serial_scanner import SerialScan
+from manage.manager import PlotManager
 import pyqtgraph as pg
 
 
@@ -13,9 +14,8 @@ class GraphUi(QDialog):
         super(GraphUi,self).__init__()
         self.channel_dict = dict()
         self._worker_dict = dict()
-        self.color_dict = ({0:'#6c6d70',1:'#EB340D',2:'#0D46EB', 3:'#d01bd3', 4:'#ed9615'})
+        self._os = SerialScan()
         self.add = 0
-        self.f = 0
 
     def addgraph(self, width, height, i, key, xname, yname, title):
         # Plot Config
@@ -38,7 +38,7 @@ class GraphUi(QDialog):
         graph_widget.setObjectName(str(key))
         graph_widget.setStyleSheet('font-size: 12pt; font-style: bold; color: 606060;')
         graph_widget.setFixedHeight(height/3)
-        graph_widget.setMinimumWidth(width*4/5)
+        graph_widget.setMaximumWidth(width*4/5)
 
         graph_layout = QGridLayout()
         graph_layout.setColumnStretch(0, 10)
@@ -50,7 +50,7 @@ class GraphUi(QDialog):
         sub_layout.addRow(str('Sample: '), self.sample_num)
         if i==2:
             self.rate_num.setText('115200')
-            sub_layout.addRow(str('Baurate: '), self.rate_num)
+            sub_layout.addRow(str('Baud-rate: '), self.rate_num)
             sub_layout.addRow(str('Port: '), self.serial_port)
         else:
             sub_layout.addRow(str('Rate: '), self.rate_num)
@@ -60,30 +60,32 @@ class GraphUi(QDialog):
 
         sub_widget.setLayout(sub_layout)
 
-        graph_layout.addWidget(self.plot_widget, 0, 0, Qt.AlignCenter)
+        graph_layout.addWidget(self._plot, 0, 0, Qt.AlignCenter)
         graph_layout.addWidget(sub_widget, 0, 1, Qt.AlignLeft)
 
         graph_widget.setLayout(graph_layout)
         self.channel_dict.update({key: graph_widget})
-        self._worker = Worker()
-        self._configure_timers()
+        self.enable_ui(True)
         return graph_widget
 
     # Plot Widget configuration
     def _plot_config(self, yname, xname, key):
-        self.plot_widget = pg.PlotWidget(parent=None, background=pg.mkColor('#FFF'))
-        self.plot_widget.setLabel('left', yname)
-        self.plot_widget.setLabel('bottom', xname)
-        self.plot_widget.plotItem.showGrid(True, True, 0.7)
+        self._plot = pg.PlotWidget(parent=None, background=pg.mkColor('#FFF'))
+        self._plot.setLabel('left', yname)
+        self._plot.setLabel('bottom', xname)
+        self._plot.plotItem.showGrid(True, True, 0.7)
 
     def _setup_config(self, i, key):
         self.sample_num = QLineEdit()
         self.sample_num.setText('500')
         self.rate_num = QLineEdit()
-        self.rate_num.setText('0.2')
+        self.rate_num.setText('0.02')
+
         self.serial_port = QComboBox()
-        self.serial_port.addItem('COM1')
-        self.serial_port.addItem('COM3')
+        self.serial_port.setEditable(True)
+        self.serial_port.setMaximumWidth(170)
+        for o in self._os._scan_serial_port():
+            self.serial_port.addItem(o)
 
         self.run_btn = QPushButton('Run')
         self.run_btn.setObjectName(str(key))
@@ -96,26 +98,6 @@ class GraphUi(QDialog):
         self.stop_btn.pressed.connect(self.on_stop_event)
 
         self.enable_ui(True)
-
-    # Set timer to update graph every 20 ms
-    def _configure_timers(self):
-        """
-        Configures specific elements of the QTimers.
-        :return:
-        """
-        self._timer_plot = QTimer(self)
-        self._timer_plot.timeout.connect(self._update_plot)
-
-    def _update_plot(self):
-        self._worker.get_plot_value()
-        self.plot_widget.plotItem.clear()
-        channel = self._worker.get_channel_num()
-        for i in range(channel):
-            self.display_plot(self._worker.getxbuffer(), self._worker.getybuffer(i), i)
-
-    def display_plot(self, x, y, p):
-        pen = pg.mkPen(self.color_dict[p], width=3, style=None)
-        self.plot_widget.plotItem.plot(x,y, pen=pen)
 
     def make_connection(self, _object_):
         _object_.add_button.connect(self.display)
@@ -144,36 +126,20 @@ class GraphUi(QDialog):
                         self.add = 1 # add top and bottom
             self.rm_button.emit(self.channel_dict[remove_id], remove_id, self.add)
             del self.channel_dict[remove_id]
-            if remove_id in self._worker_dict.keys():
-                self._stop(self._timer_plot, self._worker_dict[remove_id])
-                del self._worker_dict[remove_id]
+            if self._plot_manager.is_running():
+                self._plot_manager.stop()
         elif (m == message.No):
             pass
 
     # Run button Handler
     def on_run_event(self,i):
-        _worker_addid = int(self.sender().objectName())
-        self._worker = Worker(graph_id= i,
-                             samples=int(self.sample_num.text()),
-                             rate=float(self.rate_num.text()),
-                             port=self.serial_port.currentText())
-        print('{}'.format(self._worker.start()))
-        if self._worker.is_alive():
-            self._timer_plot.start(20)
-            self._worker_dict.update({_worker_addid: self._worker})
-            self.enable_ui(False)
-            self.f = 1
+        self.enable_ui(False)
+        self._plot_manager = PlotManager(i, self.sample_num.text(), self.rate_num.text(), self.serial_port.currentText(), self._plot)
+        self._plot_manager.start()
 
     def on_stop_event(self):
-        _worker_rmid = int(self.sender().objectName())
-        self._stop(self._timer_plot, self._worker_dict[_worker_rmid])
         self.enable_ui(True)
-
-    @staticmethod
-    def _stop(timer, worker):
-        timer.stop()
-        worker.stop()
-        worker.terminate()
+        self._plot_manager.stop()
 
     def enable_ui(self, e):
         self.rate_num.setEnabled(e)
