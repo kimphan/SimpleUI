@@ -31,15 +31,14 @@ class Serial(mp.Process):
         return False
 
     def run(self):
-        t1 = time()
         if self._is_ports_available(self._serial.port):
             if not self._serial.is_open:
                 try:
                     self._serial.open()
-                    t = time() - t1
+                    t = time()
                     while not self._exit.is_set():
                         line = self._serial.readline()
-                        self._parser.add([t, line])
+                        self._parser.add([time()-t, line])
                     self._serial.close()
                 except serial.SerialException:
                     print('cant open port')
@@ -53,7 +52,7 @@ class Serial(mp.Process):
             self._serial.baudrate = int(speed)
             self._serial.stopbits = serial.STOPBITS_ONE
             self._serial.bytesize = serial.EIGHTBITS
-            self._serial.timeout = 1
+            self._serial.timeout = 2
             return True
         else:
             return False

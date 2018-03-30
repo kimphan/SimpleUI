@@ -57,7 +57,7 @@ class RandomSimulator(mp.Process):
         t = time()
         while not self._exit.is_set():
             x = time() - t
-            y = x
+            y = x / self._speed
             self._parser.add([x, str('{}\r\n'.format(y)).encode("utf-8")])
             sleep(self._speed)
 

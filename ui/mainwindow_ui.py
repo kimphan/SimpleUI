@@ -1,16 +1,17 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
-from multiprocessing import Process
+import os, signal
 
 class ExampleUI (QMainWindow):
     LABELFONT = 15
     add_button = pyqtSignal('QGridLayout', int, int, int, str, str, str, int)
-
+    closing = pyqtSignal()
     def __init__(self):
         super(ExampleUI, self).__init__()
 
-        self.resize(1200, 800)
+        # self.resize(1200, 800)
+        self.showMaximized()
         self.center()
         self.statusBar().showMessage('Ready')
         self.setWindowTitle('Channel Plot')
@@ -25,6 +26,7 @@ class ExampleUI (QMainWindow):
 
         self.windowLayout = QHBoxLayout()
         self.central_widget.setLayout(self.windowLayout)
+        self.windowLayout.setSpacing(0)
         self.loadui()
 
     # Setup UI for main window
@@ -76,6 +78,9 @@ class ExampleUI (QMainWindow):
 
         self.windowLayout.addLayout(vertical_menu)
         self.windowLayout.addLayout(self.graph_display)
+        self.windowLayout.addStretch(10)
+
+
 
     # Label
     @staticmethod
@@ -147,7 +152,7 @@ class ExampleUI (QMainWindow):
             self.key += 1
 
             self.add_button.emit(self.graph_display, self.graph_type.currentIndex(),
-                                 self.width(),self.height(),
+                                 self.width()/5*3.5,self.height()/3,
                                  self.x_axis.text(), self.y_axis.text(), self.channel_name.text(),
                                  self.key)
             self.channel_name.clear()
@@ -158,9 +163,13 @@ class ExampleUI (QMainWindow):
     def make_connection(self, _object_):
         _object_.rm_button.connect(self.remove_channel)
 
+    def closeEvent(self, event):
+        self.closing.emit()
+        super(ExampleUI, self).closeEvent(event)
+
     @pyqtSlot('QGroupBox',int,int)
-    def remove_channel(self, rm_layout, rm_id, add_position):
-        rm_layout.close()
+    def remove_channel(self, rm_widget, rm_id, add_position):
+        rm_widget.close()
         self.channel_count -= 1
 
         # Position to add graph
@@ -175,10 +184,10 @@ class ExampleUI (QMainWindow):
             # Add 2 widget on bottom
             elif add_position == 3:
                 self.key = 1
-        else:
+        elif self.channel_count > 1:
             self.key = rm_id-1
-
-
+        else:
+            self.key = 0
 
 
 

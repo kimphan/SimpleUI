@@ -67,8 +67,8 @@ class Worker:
         temp = data[1]
         channel_num = len(temp)
         if self._lines < channel_num:
-            if channel_num > 5:
-                self._lines = 5
+            if channel_num > 6:
+                self._lines = 6
             else:
                 self._lines = channel_num
         for c in range(self._lines):
@@ -92,7 +92,7 @@ class Worker:
         x = RingBuffer(s)
         y = []
         i = 0
-        while i < 5:
+        while i < 6:
             y.append(RingBuffer(s))
             i += 1
         while not q.empty():

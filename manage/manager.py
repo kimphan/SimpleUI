@@ -1,11 +1,17 @@
+"""
+PlotManager:
+    Role: plot data
+    References:
+        https://github.com/ssepulveda/RTGraph
+"""
 import pyqtgraph as pg
 from PyQt5.QtCore import QTimer
 from manage.worker import Worker
 
 
-class PlotManager(object):
+class PlotManager:
 
-    def __init__(self, g_id, samples, rate, port, plot_widget):
+    def __init__(self, g_id=0, samples=500, rate=0.02, port=None, plot_widget=None):
         # mp.Process.__init__(self)
         self._worker = Worker()
         self._graph_id = g_id
@@ -15,7 +21,7 @@ class PlotManager(object):
         self._plot = plot_widget
 
         self._configure_timers()
-        self.color_dict = ({0:'#6c6d70',1:'#EB340D',2:'#0D46EB', 3:'#d01bd3', 4:'#ed9615'})
+        self.color_dict = ({0:'#6c6d70',1:'#EB340D',2:'#0D46EB', 3:'#d01bd3', 4:'#ed9615', 5: '#298909'})
 
     def start(self):
         self._worker = Worker(graph_id=self._graph_id,
