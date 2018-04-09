@@ -29,8 +29,8 @@ class SineSimulator(mp.Process):
         w = 2 * np.pi / self._period
         while not self._exit.is_set():
             t = time() - t1
-            sint = np.sin(w*t)
-            cost = np.cos(w*t)
+            sint = np.sin(t)
+            cost = np.cos(t)
             self._parser.add([t, str('{},{}\r\n'.format(sint, cost)).encode("utf-8")])
             sleep(self._period)
 
