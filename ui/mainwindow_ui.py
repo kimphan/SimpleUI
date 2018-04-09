@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import Qt, QEvent, pyqtSignal, pyqtSlot
 import os, signal
 
 class ExampleUI (QMainWindow):
@@ -10,8 +10,7 @@ class ExampleUI (QMainWindow):
     def __init__(self):
         super(ExampleUI, self).__init__()
 
-        # self.resize(1200, 800)
-        self.showMaximized()
+        self.resize(1200, 800)
         self.center()
         self.statusBar().showMessage('Ready')
         self.setWindowTitle('Channel Plot')
@@ -26,7 +25,6 @@ class ExampleUI (QMainWindow):
 
         self.windowLayout = QHBoxLayout()
         self.central_widget.setLayout(self.windowLayout)
-        self.windowLayout.setSpacing(0)
         self.loadui()
 
     # Setup UI for main window
@@ -78,9 +76,7 @@ class ExampleUI (QMainWindow):
 
         self.windowLayout.addLayout(vertical_menu)
         self.windowLayout.addLayout(self.graph_display)
-        self.windowLayout.addStretch(10)
-
-
+        self.windowLayout.addStretch(1)
 
     # Label
     @staticmethod
@@ -166,6 +162,14 @@ class ExampleUI (QMainWindow):
     def closeEvent(self, event):
         self.closing.emit()
         super(ExampleUI, self).closeEvent(event)
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.WindowStateChange:
+            if self.windowState() & Qt.WindowMinimized:
+                print('changeEvent: Minimised')
+            elif event.oldState() & Qt.WindowMinimized:
+                print('changeEvent: Normal/Maximised/FullScreen')
+        QWidget.changeEvent(self, event)
 
     @pyqtSlot('QGroupBox',int,int)
     def remove_channel(self, rm_widget, rm_id, add_position):
