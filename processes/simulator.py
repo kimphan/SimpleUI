@@ -26,7 +26,6 @@ class SineSimulator(mp.Process):
 
     def run(self):
         t1 = time()
-        w = 2 * np.pi / self._period
         while not self._exit.is_set():
             t = time() - t1
             sint = np.sin(t)
