@@ -6,11 +6,13 @@ import os, signal
 class ExampleUI (QMainWindow):
     LABELFONT = 15
     add_button = pyqtSignal('QGridLayout', int, int, int, str, str, str, int)
+    rescale = pyqtSignal(int, int)
     closing = pyqtSignal()
     def __init__(self):
         super(ExampleUI, self).__init__()
-
-        self.resize(1200, 800)
+        self.w = 1200
+        self.h = 800
+        self.resize(self.w, self.h)
         self.center()
         self.statusBar().showMessage('Ready')
         self.setWindowTitle('Channel Plot')
@@ -52,8 +54,8 @@ class ExampleUI (QMainWindow):
         selectC = QHBoxLayout()
         selectC.addWidget(self.channel_list)
         channel_select.setLayout(selectC)
-        channel_select.setFixedWidth(self.width()/5)
-        channel_select.setFixedHeight(self.height()/8)
+        channel_select.setFixedWidth(self.w/5)
+        channel_select.setFixedHeight(self.h/8)
 
         add_channel = QGroupBox('Add Channel')
         add_channel.setStyleSheet('font-size: 12pt; color: 606060;')
@@ -65,7 +67,7 @@ class ExampleUI (QMainWindow):
         addC.addRow(str(''), add_btn)
 
         add_channel.setLayout(addC)
-        add_channel.setFixedWidth(self.width()/5)
+        add_channel.setFixedWidth(self.w/5)
 
         vertical_menu.addWidget(channel_select)
         vertical_menu.addWidget(add_channel)
@@ -76,7 +78,7 @@ class ExampleUI (QMainWindow):
 
         self.windowLayout.addLayout(vertical_menu)
         self.windowLayout.addLayout(self.graph_display)
-        self.windowLayout.addStretch(1)
+        self.windowLayout.addStretch()
 
     # Label
     @staticmethod
@@ -89,14 +91,13 @@ class ExampleUI (QMainWindow):
 
     # Put the application window in the center of the screen
     def center(self):
-            qr = self.frameGeometry()  # specifying geometry of the main window with a rectangle 'qr'
-            cp = QDesktopWidget().availableGeometry().center()  # screen size resolution+get the center point
-            qr.moveCenter(cp)  # set the rectangle center to the center of the screen
-            self.move(qr.topLeft())  # move the top-left point of the application window to the 'qr'
+        frame = self.frameGeometry()  # specifying geometry of the main window with a rectangle 'qr'
+        cp = QDesktopWidget().availableGeometry().center()  # screen size resolution+get the center point
+        frame.moveCenter(cp)  # set the rectangle center to the center of the screen
+        self.move(frame.topLeft())  # move the top-left point of the application window to the 'qr'
 
         # Menu bar
     def mymenu(self):
-
         saveaction = self.actiondef('Save', QKeySequence.Save, self.saveact)
         editaction = self.actiondef('Edit', QKeySequence.Back, self.editact)
 
@@ -148,13 +149,12 @@ class ExampleUI (QMainWindow):
             self.key += 1
 
             self.add_button.emit(self.graph_display, self.graph_type.currentIndex(),
-                                 self.width()/5*3.5,self.height()/3,
+                                 self.w/5*3.5,self.h/3,
                                  self.x_axis.text(), self.y_axis.text(), self.channel_name.text(),
                                  self.key)
             self.channel_name.clear()
             self.x_axis.clear()
             self.y_axis.clear()
-
 
     def make_connection(self, _object_):
         _object_.rm_button.connect(self.remove_channel)
@@ -165,11 +165,11 @@ class ExampleUI (QMainWindow):
 
     def changeEvent(self, event):
         if event.type() == QEvent.WindowStateChange:
-            if self.windowState() & Qt.WindowMinimized:
-                print('changeEvent: Minimised')
-            elif event.oldState() & Qt.WindowMinimized:
-                print('changeEvent: Normal/Maximised/FullScreen')
-        QWidget.changeEvent(self, event)
+            if self.windowState() & Qt.WindowMaximized:
+                screen_resolution = qApp.desktop().screenGeometry()
+                self.w, self.h = screen_resolution.width(), screen_resolution.height()
+                self.rescale.emit(self.w/5*3.5,(self.h-100)/3)
+        super(ExampleUI,self).changeEvent(event)
 
     @pyqtSlot('QGroupBox',int,int)
     def remove_channel(self, rm_widget, rm_id, add_position):

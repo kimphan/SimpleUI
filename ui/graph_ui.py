@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import *
-from PyQt5.Qt import Qt
+from PyQt5.Qt import Qt,QEvent
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from helper.serial_scanner import SerialScan
 from manage.manager import PlotManager
@@ -36,7 +36,6 @@ class GraphUi(QDialog):
         graph_widget.setObjectName(str(key))
         graph_widget.setStyleSheet('font-size: 12pt; font-style: bold; color: 606060;')
         graph_widget.setFixedHeight(height)
-        graph_widget.setFixedWidth(width)
 
         graph_layout = QGridLayout()
         graph_layout.setColumnStretch(0, 10)
@@ -101,6 +100,7 @@ class GraphUi(QDialog):
     def make_connection(self, _object_):
         _object_.add_button.connect(self.display)
         _object_.closing.connect(self.clean_up)
+        _object_.rescale.connect(self.plot_resize)
 
     # Remove button Handler
     def on_remove_event(self):
@@ -175,4 +175,9 @@ class GraphUi(QDialog):
             for plot_id in self._manager_dict.keys():
                 self.stop_processes(self._manager_dict[plot_id])
             self._manager_dict.clear()
+
+    @pyqtSlot(int, int)
+    def plot_resize(self,w,h):
+        for k in self.channel_dict.keys():
+            self.channel_dict[k].setFixedHeight(h)
 
