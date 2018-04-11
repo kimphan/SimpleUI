@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.Qt import Qt,QEvent
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QRect
 from helper.serial_scanner import SerialScan
 from manage.manager import PlotManager
 import pyqtgraph as pg
@@ -16,11 +16,19 @@ class GraphUi(QDialog):
         self._os = SerialScan()
         self._plot_manager = PlotManager()
         self.add = 0
+        self.yname = None
+        self.xname = None
 
-    def addgraph(self, width, height, i, key, xname, yname, title):
+    def addgraph(self, width, height, i, key, title):
 
         # Setup widget
-        _sample_num, _rate_num, _serial_port, _run_btn, _stop_btn, _plot = self._widget_config(i,key,yname,xname)
+        _sample_num, _rate_num, _serial_port, _run_btn, _stop_btn = self._widget_config(i,key)
+        _plot = self.plot_config(self.yname, self.xname)
+        _plot.setMinimumWidth(width)
+        _run_btn.pressed.connect(lambda: self.on_run_event(i, _stop_btn, _run_btn, _rate_num, _sample_num, _serial_port, _plot))
+        _stop_btn.pressed.connect(lambda: self.on_stop_event(_stop_btn, _run_btn, _rate_num, _serial_port))
+
+
 
         # Qt Display
         layout = QHBoxLayout()
@@ -36,12 +44,11 @@ class GraphUi(QDialog):
         graph_widget.setObjectName(str(key))
         graph_widget.setStyleSheet('font-size: 12pt; font-style: bold; color: 606060;')
         graph_widget.setFixedHeight(height)
+        graph_widget.setMinimumWidth(width)
 
         graph_layout = QGridLayout()
-        graph_layout.setColumnStretch(0, 10)
-        graph_layout.setColumnStretch(1, 3)
 
-        sub_widget = QGroupBox()
+        sub_widget = QWidget()
         sub_layout = QFormLayout()
         sub_layout.setAlignment(Qt.AlignRight)
         sub_layout.addRow(str('Sample: '), _sample_num)
@@ -57,21 +64,16 @@ class GraphUi(QDialog):
 
         sub_widget.setLayout(sub_layout)
 
-        graph_layout.addWidget(_plot, 0, 0, Qt.AlignCenter)
-        graph_layout.addWidget(sub_widget, 0, 1, Qt.AlignLeft)
+        graph_layout.addWidget(_plot, 0, 0, 3, 1, Qt.AlignLeft)
+        graph_layout.addWidget(sub_widget, 0, 1, 3, 1,Qt.AlignLeft)
 
         graph_widget.setLayout(graph_layout)
-        self.channel_dict.update({key: graph_widget})
+        self.channel_dict.update({key: [graph_widget,_plot]})
         self.enable_ui(True,_stop_btn, _run_btn, _rate_num, _serial_port)
         return graph_widget
 
 
-    def _widget_config(self, i, key, yname, xname):
-        # Plot Widget config
-        plot = pg.PlotWidget(parent=None, background=pg.mkColor('#FFF'))
-        plot.setLabel('left', yname)
-        plot.setLabel('bottom', xname)
-        plot.plotItem.showGrid(True, True, 0.7)
+    def _widget_config(self, i, key):
 
         # Other setup config
         sample_num = QLineEdit()
@@ -88,14 +90,21 @@ class GraphUi(QDialog):
         run_btn = QPushButton('Run')
         run_btn.setObjectName(str(key))
         run_btn.setStyleSheet('font-size: 12pt;')
-        run_btn.pressed.connect(lambda: self.on_run_event(i, stop_btn, run_btn, rate_num, sample_num, serial_port, plot))
 
         stop_btn = QPushButton('Stop')
         stop_btn.setObjectName(str(key))
         stop_btn.setStyleSheet('font-size: 12pt;')
-        stop_btn.pressed.connect(lambda: self.on_stop_event(stop_btn, run_btn, rate_num, serial_port))
 
-        return sample_num, rate_num, serial_port, run_btn, stop_btn, plot
+        return sample_num, rate_num, serial_port, run_btn, stop_btn
+
+    def plot_config(self, yname, xname):
+        # Plot Widget config
+        plot = pg.PlotWidget(parent=None, background=pg.mkColor('#FFF'))
+        plot.setLabel('left', yname)
+        plot.setLabel('bottom', xname)
+        plot.setAntialiasing(True)
+        plot.plotItem.showGrid(True, True, 1)
+        return plot
 
     def make_connection(self, _object_):
         _object_.add_button.connect(self.display)
@@ -124,7 +133,7 @@ class GraphUi(QDialog):
                         self.add = 3 # add bottom
                     elif 2 in self.channel_dict.keys():
                         self.add = 1 # add top and bottom
-            self.rm_button.emit(self.channel_dict[remove_id], remove_id, self.add)
+            self.rm_button.emit(self.channel_dict[remove_id][0], remove_id, self.add)
             del self.channel_dict[remove_id]
 
             if str(remove_id) in self._manager_dict.keys():
@@ -164,10 +173,12 @@ class GraphUi(QDialog):
 
     @pyqtSlot('QGridLayout', int, int, int, str, str, str, int)
     def display(self, graph_display, index, width, height, xname, yname, title, key):
-        graph_display.setRowStretch(key, 4)
-        channel = self.addgraph(width, height, index, key, xname, yname, title)
+        graph_display.setRowStretch(key, 3)
+        channel = self.addgraph(width, height, index, key, title)
         graph_display.addWidget(channel, key, 0)
         self.index = index
+        self.yname = yname
+        self.xname = xname
 
     @pyqtSlot()
     def clean_up(self):
@@ -176,8 +187,14 @@ class GraphUi(QDialog):
                 self.stop_processes(self._manager_dict[plot_id])
             self._manager_dict.clear()
 
-    @pyqtSlot(int, int)
-    def plot_resize(self,w,h):
+    @pyqtSlot(int, int,int)
+    def plot_resize(self,w,h,flag):
+
         for k in self.channel_dict.keys():
-            self.channel_dict[k].setFixedHeight(h)
+            self.channel_dict[k][0].setFixedHeight(h)
+            self.channel_dict[k][0].setFixedWidth(w)
+            self.channel_dict[k][1].setFixedWidth(w*3/4)
+
+
+
 

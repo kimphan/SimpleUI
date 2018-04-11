@@ -51,6 +51,7 @@ class PlotManager:
             for i in range(channel):
                 pen = pg.mkPen(self.color_dict[i], width=3, style=None)
                 self._plot.plotItem.plot(self._worker.getxbuffer(), self._worker.getybuffer(i), pen=pen)
+
         else:
             print('Failed')
 

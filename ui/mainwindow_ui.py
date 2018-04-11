@@ -6,13 +6,14 @@ import os, signal
 class ExampleUI (QMainWindow):
     LABELFONT = 15
     add_button = pyqtSignal('QGridLayout', int, int, int, str, str, str, int)
-    rescale = pyqtSignal(int, int)
+    rescale = pyqtSignal(int, int,int)
     closing = pyqtSignal()
     def __init__(self):
         super(ExampleUI, self).__init__()
         self.w = 1200
-        self.h = 800
-        self.resize(self.w, self.h)
+        self.h = 700
+        self.setMinimumHeight(self.h+100)
+        self.setMinimumWidth(self.w)
         self.center()
         self.statusBar().showMessage('Ready')
         self.setWindowTitle('Channel Plot')
@@ -26,6 +27,7 @@ class ExampleUI (QMainWindow):
         self.setCentralWidget(self.central_widget)
 
         self.windowLayout = QHBoxLayout()
+        self.windowLayout.setAlignment(Qt.AlignLeft)
         self.central_widget.setLayout(self.windowLayout)
         self.loadui()
 
@@ -74,12 +76,11 @@ class ExampleUI (QMainWindow):
 
         self.graph_display = QGridLayout()
         self.graph_display.setAlignment(Qt.AlignTop)
-        self.graph_display.SetMinAndMaxSize
+        self.graph_display.SetFixedSize
 
         self.windowLayout.addLayout(vertical_menu)
         self.windowLayout.addLayout(self.graph_display)
         self.windowLayout.addStretch()
-
     # Label
     @staticmethod
     def label(name,fontsize=12):
@@ -147,9 +148,8 @@ class ExampleUI (QMainWindow):
         else:
             self.channel_count += 1
             self.key += 1
-
             self.add_button.emit(self.graph_display, self.graph_type.currentIndex(),
-                                 self.w/5*3.5,self.h/3,
+                                 self.w/5*3, self.h/3,
                                  self.x_axis.text(), self.y_axis.text(), self.channel_name.text(),
                                  self.key)
             self.channel_name.clear()
@@ -165,11 +165,18 @@ class ExampleUI (QMainWindow):
 
     def changeEvent(self, event):
         if event.type() == QEvent.WindowStateChange:
-            if self.windowState() & Qt.WindowMaximized:
+            if self.windowState() == Qt.WindowFullScreen:
                 screen_resolution = qApp.desktop().screenGeometry()
                 self.w, self.h = screen_resolution.width(), screen_resolution.height()
-                self.rescale.emit(self.w/5*3.5,(self.h-100)/3)
+                self.h -= 100
+                self.rescale.emit(self.w/5*4, self.h/3, 1)
+            else:
+                self.h = 700
+                self.w = 1200
+                self.rescale.emit(self.w/5*4, self.h/3, 0)
+
         super(ExampleUI,self).changeEvent(event)
+
 
     @pyqtSlot('QGroupBox',int,int)
     def remove_channel(self, rm_widget, rm_id, add_position):
