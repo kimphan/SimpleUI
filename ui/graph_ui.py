@@ -3,6 +3,7 @@ from PyQt5.Qt import Qt,QEvent
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QRect
 from helper.serial_scanner import SerialScan
 from manage.manager import PlotManager
+from ui.mainwindow_ui import ExampleUI
 import pyqtgraph as pg
 
 
@@ -14,13 +15,13 @@ class GraphUi(QDialog):
         self.channel_dict = dict()
         self._manager_dict = dict()
         self._os = SerialScan()
-        self._plot_manager = PlotManager()
         self.add = 0
         self.yname = None
         self.xname = None
+        self.channel_list = None
+        self.mainwin = ExampleUI()
 
     def addgraph(self, width, height, i, key, title):
-
         # Setup widget
         _sample_num, _rate_num, _serial_port, _run_btn, _stop_btn = self._widget_config(i,key)
         _plot = self.plot_config(self.yname, self.xname)
@@ -52,7 +53,7 @@ class GraphUi(QDialog):
         sub_layout.addRow(str('Sample: '), _sample_num)
         if i==2:
             _rate_num.setText('115200')
-            sub_layout.addRow(str('Baud-rate: '), _rate_num)
+            sub_layout.addRow(str('Baudrate: '), _rate_num)
             sub_layout.addRow(str('Port: '), _serial_port)
         else:
             sub_layout.addRow(str('Rate: '), _rate_num)
@@ -81,7 +82,7 @@ class GraphUi(QDialog):
 
         serial_port = QComboBox()
         serial_port.setEditable(True)
-        serial_port.setFixedWidth(150)
+        serial_port.setFixedWidth(100)
         for o in self._os._scan_serial_port():
             serial_port.addItem(o)
 
@@ -137,8 +138,6 @@ class GraphUi(QDialog):
             if str(remove_id) in self._manager_dict.keys():
                 self.stop_processes(self._manager_dict[str(remove_id)])
                 del self._manager_dict[str(remove_id)]
-
-
         elif (m == message.No):
             pass
 
@@ -147,9 +146,9 @@ class GraphUi(QDialog):
         self.enable_ui(False,stop_btn, run_btn, rate_num, serial_port)
         add_id = self.sender().objectName()
         if add_id not in self._manager_dict.keys():
-            self._plot_manager = PlotManager(i, sample_num.text(), rate_num.text(), serial_port.currentText(), plot)
-            self._plot_manager.start()
-            self._manager_dict.update({add_id: self._plot_manager})
+            _plot_manager = PlotManager(i, sample_num.text(), rate_num.text(), serial_port.currentText(), plot)
+            _plot_manager.start()
+            self._manager_dict.update({add_id:_plot_manager})
         else:
             self._manager_dict[add_id].update_parameter(sample_num.text(), rate_num.text())
             self._manager_dict[add_id].start()
@@ -172,12 +171,12 @@ class GraphUi(QDialog):
 
     @pyqtSlot('QGridLayout', int, int, int, str, str, str, int)
     def display(self, graph_display, index, width, height, xname, yname, title, key):
+        self.yname = yname
+        self.xname = xname
         graph_display.setRowStretch(key, 3)
         channel = self.addgraph(width, height, index, key, title)
         graph_display.addWidget(channel, key, 0)
         self.index = index
-        self.yname = yname
-        self.xname = xname
 
     @pyqtSlot()
     def clean_up(self):
@@ -186,14 +185,10 @@ class GraphUi(QDialog):
                 self.stop_processes(self._manager_dict[plot_id])
             self._manager_dict.clear()
 
-    @pyqtSlot(int, int,int)
+    @pyqtSlot(int, int, int)
     def plot_resize(self,w,h,flag):
 
         for k in self.channel_dict.keys():
             self.channel_dict[k][0].setFixedHeight(h)
             self.channel_dict[k][0].setFixedWidth(w)
             self.channel_dict[k][1].setFixedWidth(w*3/4)
-
-
-
-

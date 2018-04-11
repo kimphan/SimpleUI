@@ -1,6 +1,5 @@
 import glob, platform
 from serial.tools import list_ports
-
 class SerialScan:
 
     def __init__(self):

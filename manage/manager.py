@@ -5,13 +5,12 @@ PlotManager:
         https://github.com/ssepulveda/RTGraph
 """
 import pyqtgraph as pg
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer,pyqtSignal,QObject
 from manage.worker import Worker
 
-
-class PlotManager:
-
+class PlotManager(QObject):
     def __init__(self, g_id=0, samples=500, rate=0.02, port=None, plot_widget=None):
+        super(PlotManager,self).__init__()
         # mp.Process.__init__(self)
         self._worker = Worker()
         self._graph_id = g_id
@@ -47,11 +46,10 @@ class PlotManager:
         if self._worker.is_running():
             self._worker.get_plot_value()
             self._plot.plotItem.clear()
-            channel = self._worker.get_channel_num()
-            for i in range(channel):
+            count = self._worker.get_channel_num()
+            for i in range(count):
                 pen = pg.mkPen(self.color_dict[i], width=3, style=None)
                 self._plot.plotItem.plot(self._worker.getxbuffer(), self._worker.getybuffer(i), pen=pen)
-
         else:
             print('Failed')
 
@@ -61,4 +59,11 @@ class PlotManager:
     def update_parameter(self,s,r):
         self._samples = int(s)
         self._rate = float(r)
+
+    def _readline(self):
+        return self._worker.get_channel_num()
+
+
+
+
 

@@ -20,7 +20,7 @@ class ExampleUI (QMainWindow):
         self.setMenuBar(self.mymenu())
 
         self.key = 0
-        self.channel_count = 0
+        self.plot_count = 0
         self.addtopbottom = False
 
         self.central_widget = QWidget()
@@ -42,6 +42,7 @@ class ExampleUI (QMainWindow):
         self.x_axis = QLineEdit()
         self.y_axis = QLineEdit()
 
+        self.x_axis.setText('Time (s)')
         # Graph type list for displaying option
         self.graph_type.addItem('Random Plot')
         self.graph_type.addItem('Sine Simulator')
@@ -76,11 +77,11 @@ class ExampleUI (QMainWindow):
 
         self.graph_display = QGridLayout()
         self.graph_display.setAlignment(Qt.AlignTop)
-        self.graph_display.SetFixedSize
+        # self.graph_display.SetFixedSize
 
         self.windowLayout.addLayout(vertical_menu)
         self.windowLayout.addLayout(self.graph_display)
-        self.windowLayout.addStretch()
+        # self.windowLayout.addStretch()
     # Label
     @staticmethod
     def label(name,fontsize=12):
@@ -141,17 +142,19 @@ class ExampleUI (QMainWindow):
             self.key = 2
             self.addtopbottom = False
 
-        if self.channel_count >= 3:
+        if self.plot_count >= 3:
             message = QMessageBox.information(self, 'Message', 'Number of displayed graph exceeds the limit.', QMessageBox.Ok)
             if QMessageBox.Ok:
                 pass
         else:
-            self.channel_count += 1
+            self.plot_count += 1
             self.key += 1
+            self.channel(self.graph_type.currentIndex())
             self.add_button.emit(self.graph_display, self.graph_type.currentIndex(),
                                  self.w/5*3, self.h/3,
                                  self.x_axis.text(), self.y_axis.text(), self.channel_name.text(),
                                  self.key)
+
             self.channel_name.clear()
             self.x_axis.clear()
             self.y_axis.clear()
@@ -159,13 +162,15 @@ class ExampleUI (QMainWindow):
     def make_connection(self, _object_):
         _object_.rm_button.connect(self.remove_channel)
 
+
     def closeEvent(self, event):
         self.closing.emit()
         super(ExampleUI, self).closeEvent(event)
 
     def changeEvent(self, event):
         if event.type() == QEvent.WindowStateChange:
-            if self.windowState() == Qt.WindowFullScreen:
+            # if self.windowState() == Qt.WindowFullScreen:
+            if self.windowState() & Qt.WindowMaximized:
                 screen_resolution = qApp.desktop().screenGeometry()
                 self.w, self.h = screen_resolution.width(), screen_resolution.height()
                 self.h -= 100
@@ -177,14 +182,13 @@ class ExampleUI (QMainWindow):
 
         super(ExampleUI,self).changeEvent(event)
 
-
     @pyqtSlot('QGroupBox',int,int)
     def remove_channel(self, rm_widget, rm_id, add_position):
         rm_widget.close()
-        self.channel_count -= 1
+        self.plot_count -= 1
 
         # Position to add graph
-        if self.channel_count == 1:
+        if self.plot_count == 1:
             # Add 1 widget on top and 1 at bottom
             if add_position == 1:
                 self.key = 0
@@ -195,18 +199,19 @@ class ExampleUI (QMainWindow):
             # Add 2 widget on bottom
             elif add_position == 3:
                 self.key = 1
-        elif self.channel_count > 1:
+        elif self.plot_count > 1:
             self.key = rm_id-1
         else:
             self.key = 0
 
-
-
-
-
-
-
-
+    def channel(self, cBox_idx):
+        self.channel_list.clear()
+        if cBox_idx == 0:
+            self.channel_list.addItem('Single')
+        else:
+            for i in range(cBox_idx):
+                self.channel_list.addItem('Channel '+str(i+1))
+            self.channel_list.addItem('Both')
 
 
 
