@@ -28,8 +28,6 @@ class GraphUi(QDialog):
         _run_btn.pressed.connect(lambda: self.on_run_event(i, _stop_btn, _run_btn, _rate_num, _sample_num, _serial_port, _plot))
         _stop_btn.pressed.connect(lambda: self.on_stop_event(_stop_btn, _run_btn, _rate_num, _serial_port))
 
-
-
         # Qt Display
         layout = QHBoxLayout()
         layout.addWidget(_stop_btn)
@@ -153,6 +151,7 @@ class GraphUi(QDialog):
             self._plot_manager.start()
             self._manager_dict.update({add_id: self._plot_manager})
         else:
+            self._manager_dict[add_id].update_parameter(sample_num.text(), rate_num.text())
             self._manager_dict[add_id].start()
 
     def on_stop_event(self,stop_btn, run_btn, rate_num, serial_port):

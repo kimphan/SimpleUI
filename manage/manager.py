@@ -58,3 +58,7 @@ class PlotManager:
     def is_running(self):
         return self._worker.is_running()
 
+    def update_parameter(self,s,r):
+        self._samples = int(s)
+        self._rate = float(r)
+
