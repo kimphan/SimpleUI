@@ -1,13 +1,15 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QEvent, pyqtSignal, pyqtSlot
+from ui.graph_ui import GraphUi
+from manage.manager import PlotManager
+from helper.serial_scanner import SerialScan
 import os, signal
 
 class ExampleUI (QMainWindow):
     LABELFONT = 15
     add_button = pyqtSignal('QGridLayout', int, int, int, str, str, str, int)
-    rescale = pyqtSignal(int, int,int)
-    closing = pyqtSignal()
+
     def __init__(self):
         super(ExampleUI, self).__init__()
         self.w = 1200
@@ -21,7 +23,13 @@ class ExampleUI (QMainWindow):
 
         self.key = 0
         self.plot_count = 0
+        self.add = 0
+        self.splot_count = 0
+        self.port = None
         self.addtopbottom = False
+
+        self.store_graph = dict()
+        self.store_plot = dict()
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -43,10 +51,11 @@ class ExampleUI (QMainWindow):
         self.y_axis = QLineEdit()
 
         self.x_axis.setText('Time (s)')
+        self.channel_list.currentTextChanged.connect(self.selectionChange)
         # Graph type list for displaying option
-        self.graph_type.addItem('Random Plot')
-        self.graph_type.addItem('Sine Simulator')
         self.graph_type.addItem('Serial')
+        self.graph_type.addItem('Sine Simulator')
+        self.graph_type.addItem('Random Plot')
 
         vertical_menu = QVBoxLayout()
         vertical_menu.setAlignment(Qt.AlignLeft)
@@ -77,7 +86,7 @@ class ExampleUI (QMainWindow):
 
         self.graph_display = QGridLayout()
         self.graph_display.setAlignment(Qt.AlignTop)
-        # self.graph_display.SetFixedSize
+        self.graph_display.SetFixedSize
 
         self.windowLayout.addLayout(vertical_menu)
         self.windowLayout.addLayout(self.graph_display)
@@ -147,71 +156,159 @@ class ExampleUI (QMainWindow):
             if QMessageBox.Ok:
                 pass
         else:
-            self.plot_count += 1
-            self.key += 1
-            self.channel(self.graph_type.currentIndex())
-            self.add_button.emit(self.graph_display, self.graph_type.currentIndex(),
-                                 self.w/5*3, self.h/3,
-                                 self.x_axis.text(), self.y_axis.text(), self.channel_name.text(),
-                                 self.key)
+            self.channel_list.clear()
+            if self.graph_type.currentIndex() == 0:
+                if not self.channel_sensing():
+                    print('No Serial port found')
+            elif self.graph_type.currentIndex() == 1:
+                self.channel_list.addItem('Both')
+                for i in range(self.graph_type.currentIndex() + 1):
+                    self.channel_list.addItem('Channel ' + str(i + 1))
+            else:
+                self.channel_list.addItem('Single plot')
+            self.draw()
 
             self.channel_name.clear()
-            self.x_axis.clear()
+            self.x_axis.setText('Time (s)')
             self.y_axis.clear()
 
-    def make_connection(self, _object_):
-        _object_.rm_button.connect(self.remove_channel)
+    def draw(self):
+        self.plot_count += 1
+        self.key += 1
+        graph = GraphUi(self.graph_type.currentIndex(),
+                        self.w / 5 * 3, self.h / 3,
+                        self.x_axis.text(), self.y_axis.text(), self.channel_name.text(),
+                        self.key)
+        self.graph_display.setRowStretch(self.key, 3)
+        draw_graph = graph.addgraph()
+        self.graph_display.addWidget(draw_graph, self.key, 0)
+        self.make_connection(graph)
+        self.store_graph.update({self.key: [graph, draw_graph]})
+        graph._serial_port.setCurrentText(self.port)
+        _plot_manager = PlotManager(graph.graphID, graph._sample_num.text(), graph._rate_num.text(), self.port,
+                                    graph._plot)
+        self.store_plot.update({self.key: _plot_manager})
+        graph._serial_port.setCurrentText(self.port)
 
+    def make_connection(self, _object_):
+        _object_.rm_action.connect(self.remove_plot)
+        _object_.plot_action.connect(self.plot_data)
+        _object_.stop_action.connect(self.stop_plot)
 
     def closeEvent(self, event):
-        self.closing.emit()
+        if len(self.store_plot) != 0 :
+            for plot_id in self.store_plot.keys():
+                self.stop_processes(self.store_plot[plot_id])
+            self.store_plot.clear()
         super(ExampleUI, self).closeEvent(event)
 
     def changeEvent(self, event):
         if event.type() == QEvent.WindowStateChange:
-            # if self.windowState() == Qt.WindowFullScreen:
-            if self.windowState() & Qt.WindowMaximized:
+            if self.windowState() == Qt.WindowFullScreen:
+            # if self.windowState() & Qt.WindowMaximized:
                 screen_resolution = qApp.desktop().screenGeometry()
                 self.w, self.h = screen_resolution.width(), screen_resolution.height()
                 self.h -= 100
-                self.rescale.emit(self.w/5*4, self.h/3, 1)
+                self.resize_plot(self.w/5*4, self.h/3)
             else:
                 self.h = 700
                 self.w = 1200
-                self.rescale.emit(self.w/5*4, self.h/3, 0)
+                self.resize_plot(self.w/5*4, self.h/3)
 
         super(ExampleUI,self).changeEvent(event)
 
-    @pyqtSlot('QGroupBox',int,int)
-    def remove_channel(self, rm_widget, rm_id, add_position):
-        rm_widget.close()
+    def resize_plot(self,w,h):
+        for k in self.store_graph.keys():
+            self.store_graph[k][1].setFixedHeight(h)
+            self.store_graph[k][1].setFixedWidth(w)
+            self.store_graph[k][0]._plot.setFixedWidth(w*3/4)
+
+    @pyqtSlot(int)
+    def remove_plot(self,rm_id):
         self.plot_count -= 1
+        message = QMessageBox()
+        m = message.question(self, 'Message', 'Do you want to delete the channel?', QMessageBox.Yes | QMessageBox.No,
+                             QMessageBox.No)
+        if (m == message.Yes):
+            if len(self.store_graph) == 2:
+                if (rm_id == 1):
+                    if 2 in self.store_graph.keys():
+                        self.add = 1  # add top and bottom
+                    elif 3 in self.store_graph.keys():
+                        self.add = 2  # add top
+                elif (rm_id == 2):
+                    if 1 in self.store_graph.keys():
+                        self.add = 3  # add bottom
+                    elif 3 in self.store_graph.keys():
+                        self.add = 2  # add top
+                elif (rm_id == 3):
+                    if 1 in self.store_graph.keys():
+                        self.add = 3  # add bottom
+                    elif 2 in self.store_graph.keys():
+                        self.add = 1  # add top and bottom
+            self.store_graph[rm_id][1].close()
+            del self.store_graph[rm_id]
+        elif (m == message.No):
+            pass
 
         # Position to add graph
         if self.plot_count == 1:
             # Add 1 widget on top and 1 at bottom
-            if add_position == 1:
+            if self.add == 1:
                 self.key = 0
                 self.addtopbottom = True
             # Add 2 widget on top
-            elif add_position == 2:
+            elif self.add == 2:
                 self.key = 0
             # Add 2 widget on bottom
-            elif add_position == 3:
+            elif self.add == 3:
                 self.key = 1
         elif self.plot_count > 1:
             self.key = rm_id-1
         else:
             self.key = 0
 
-    def channel(self, cBox_idx):
-        self.channel_list.clear()
-        if cBox_idx == 0:
-            self.channel_list.addItem('Single')
+    @pyqtSlot(int)
+    def plot_data(self, run_id):
+        info = self.store_graph[run_id][0]
+        self.store_plot[run_id].update_parameter(info._sample_num.text(), info._rate_num.text())
+        self.store_plot[run_id].start()
+
+
+    @pyqtSlot(int)
+    def stop_plot(self,stop_id):
+        if stop_id in self.store_plot.keys():
+            self.stop_processes(self.store_plot[stop_id])
+
+    @staticmethod
+    def stop_processes(current_plot):
+        if current_plot.is_running():
+            current_plot.stop()
+
+    def channel_sensing(self):
+
+        scan = SerialScan()
+        channel_line, port = scan.channel_scan(115200)
+        if channel_line == 0:
+            message = QMessageBox.information(self, 'Message', 'Cannot recognize channel.', QMessageBox.Ok)
+            if QMessageBox.Ok:
+                return False
         else:
-            for i in range(cBox_idx):
-                self.channel_list.addItem('Channel '+str(i+1))
+            self.port = port
             self.channel_list.addItem('Both')
+            for c in range(channel_line):
+                self.channel_list.addItem('Channel ' + str(c+1))
+        return True
 
-
+    def selectionChange(self,i):
+        if i == 'Both':
+            pass
+        else:
+            t = i.split(' ')
+            idx = int(t[1])
+            self.draw()
+            info = self.store_graph[self.key][0]
+            self.store_plot[self.key].update_parameter(info._sample_num.text(), info._rate_num.text(),True)
+            self.store_plot[self.key].start()
+            self.store_graph[self.key][0].enable_ui(False, info._stop_btn, info._run_btn, info._rate_num, info._serial_port)
 

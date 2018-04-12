@@ -3,77 +3,92 @@ from PyQt5.Qt import Qt,QEvent
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QRect
 from helper.serial_scanner import SerialScan
 from manage.manager import PlotManager
-from ui.mainwindow_ui import ExampleUI
 import pyqtgraph as pg
 
 
 class GraphUi(QDialog):
-    rm_button = pyqtSignal('QGroupBox',int,int)
+    rm_action = pyqtSignal(int)
+    plot_action = pyqtSignal(int)
+    stop_action = pyqtSignal(int)
 
-    def __init__(self):
+
+    def __init__(self, graph_i=0, width=900, height=300, xn=None, yn=None, title=None, key=0):
         super(GraphUi,self).__init__()
         self.channel_dict = dict()
         self._manager_dict = dict()
-        self._os = SerialScan()
-        self.add = 0
-        self.yname = None
-        self.xname = None
         self.channel_list = None
-        self.mainwin = ExampleUI()
+        self._os = SerialScan()
 
-    def addgraph(self, width, height, i, key, title):
+        self.add = 0
+        self.graphID = graph_i
+        self.width = width
+        self.height = height
+        self.xname = xn
+        self.yname = yn
+        self.graphName = title
+        self.dkey = key
+        self._plot = None
+        self._sample_num = None
+        self._rate_num = None
+        self._serial_port = None
+        self._run_btn = None
+        self._stop_btn = None
+        self._remove_btn = None
+
+
+    def addgraph(self):
         # Setup widget
-        _sample_num, _rate_num, _serial_port, _run_btn, _stop_btn = self._widget_config(i,key)
-        _plot = self.plot_config(self.yname, self.xname)
-        _plot.setMinimumWidth(width)
-        _run_btn.pressed.connect(lambda: self.on_run_event(i, _stop_btn, _run_btn, _rate_num, _sample_num, _serial_port, _plot))
-        _stop_btn.pressed.connect(lambda: self.on_stop_event(_stop_btn, _run_btn, _rate_num, _serial_port))
+        self._sample_num, self._rate_num, self._serial_port, self._run_btn, self._stop_btn = self._widget_config(self.dkey)
+        self._plot = self.plot_config(self.yname, self.xname)
+        self._plot.setMinimumWidth(self.width)
+        self._run_btn.pressed.connect(lambda: self.on_run_event(self.graphID, self._stop_btn, self._run_btn, self._rate_num, self._sample_num, self._serial_port, self._plot))
+        self._stop_btn.pressed.connect(lambda: self.on_stop_event(self._stop_btn, self._run_btn, self._rate_num, self._serial_port))
 
         # Qt Display
         layout = QHBoxLayout()
-        layout.addWidget(_stop_btn)
-        layout.addWidget(_run_btn)
+        layout.addWidget(self._stop_btn)
+        layout.addWidget(self._run_btn)
 
-        remove_btn = QPushButton('Remove')
-        remove_btn.setObjectName(str(key))
-        remove_btn.setStyleSheet('font-size: 12pt;')
-        remove_btn.pressed.connect(self.on_remove_event)
+        self._remove_btn = QPushButton('Remove')
+        self._remove_btn.setObjectName(str(self.dkey))
+        self._remove_btn.setStyleSheet('font-size: 12pt;')
+        self._remove_btn.pressed.connect(self.on_remove_event)
 
-        graph_widget = QGroupBox(title)
-        graph_widget.setObjectName(str(key))
+        graph_widget = QGroupBox(self.graphName)
+        graph_widget.setObjectName(str(self.dkey))
         graph_widget.setStyleSheet('font-size: 12pt; font-style: bold; color: 606060;')
-        graph_widget.setFixedHeight(height)
-        graph_widget.setMinimumWidth(width)
+        graph_widget.setFixedHeight(self.height)
+        graph_widget.setMinimumWidth(self.width)
 
         graph_layout = QGridLayout()
 
         sub_widget = QWidget()
         sub_layout = QFormLayout()
         sub_layout.setAlignment(Qt.AlignRight)
-        sub_layout.addRow(str('Sample: '), _sample_num)
-        if i==2:
-            _rate_num.setText('115200')
-            sub_layout.addRow(str('Baudrate: '), _rate_num)
-            sub_layout.addRow(str('Port: '), _serial_port)
+        sub_layout.addRow(str('Sample: '), self._sample_num)
+        if self.graphID==0:
+            self._rate_num.setText('115200')
+            sub_layout.addRow(str('Baudrate: '), self._rate_num)
+            sub_layout.addRow(str('Port: '), self._serial_port)
         else:
-            sub_layout.addRow(str('Rate: '), _rate_num)
+            sub_layout.addRow(str('Rate: '), self._rate_num)
 
         sub_layout.addRow(str(''),layout)
-        sub_layout.addRow(str(''),remove_btn)
+        sub_layout.addRow(str(''),self._remove_btn)
 
         sub_widget.setLayout(sub_layout)
 
-        graph_layout.addWidget(_plot, 0, 0, 3, 1, Qt.AlignLeft)
+        graph_layout.addWidget(self._plot, 0, 0, 3, 1, Qt.AlignLeft)
         graph_layout.addWidget(sub_widget, 0, 1, 3, 1,Qt.AlignLeft)
 
         graph_widget.setLayout(graph_layout)
-        self.channel_dict.update({key: [graph_widget,_plot]})
-        self.enable_ui(True,_stop_btn, _run_btn, _rate_num, _serial_port)
+        self.channel_dict.update({self.dkey: [graph_widget, self._plot]})
+
+        self.enable_ui(True,self._stop_btn, self._run_btn, self._rate_num, self._serial_port)
         return graph_widget
 
 
-    def _widget_config(self, i, key):
-
+    def _widget_config(self,key):
         # Other setup config
         sample_num = QLineEdit()
         sample_num.setText('500')
@@ -106,58 +121,25 @@ class GraphUi(QDialog):
         return plot
 
     def make_connection(self, _object_):
-        _object_.add_button.connect(self.display)
+        # _object_.add_button.connect(self.display)
         _object_.closing.connect(self.clean_up)
         _object_.rescale.connect(self.plot_resize)
 
     # Remove button Handler
     def on_remove_event(self):
         remove_id = int(self.sender().objectName())
-        message = QMessageBox()
-        m = message.question(self,'Message','Do you want to delete the channel?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if (m == message.Yes):
-            if len(self.channel_dict) == 2:
-                if (remove_id == 1):
-                    if 2 in self.channel_dict.keys():
-                        self.add = 1 # add top and bottom
-                    elif 3 in self.channel_dict.keys():
-                        self.add = 2 # add top
-                elif (remove_id == 2):
-                    if 1 in self.channel_dict.keys():
-                        self.add = 3 # add bottom
-                    elif 3 in self.channel_dict.keys():
-                        self.add = 2 # add top
-                elif (remove_id == 3):
-                    if 1 in self.channel_dict.keys():
-                        self.add = 3 # add bottom
-                    elif 2 in self.channel_dict.keys():
-                        self.add = 1 # add top and bottom
-            self.rm_button.emit(self.channel_dict[remove_id][0], remove_id, self.add)
-            del self.channel_dict[remove_id]
-
-            if str(remove_id) in self._manager_dict.keys():
-                self.stop_processes(self._manager_dict[str(remove_id)])
-                del self._manager_dict[str(remove_id)]
-        elif (m == message.No):
-            pass
+        self.rm_action.emit(remove_id)
 
     # Run button Handler
-    def on_run_event(self,i, stop_btn, run_btn, rate_num, sample_num, serial_port, plot):
+    def on_run_event(self, i, stop_btn, run_btn, rate_num, sample_num, serial_port, plot):
         self.enable_ui(False,stop_btn, run_btn, rate_num, serial_port)
-        add_id = self.sender().objectName()
-        if add_id not in self._manager_dict.keys():
-            _plot_manager = PlotManager(i, sample_num.text(), rate_num.text(), serial_port.currentText(), plot)
-            _plot_manager.start()
-            self._manager_dict.update({add_id:_plot_manager})
-        else:
-            self._manager_dict[add_id].update_parameter(sample_num.text(), rate_num.text())
-            self._manager_dict[add_id].start()
+        run_id = int(self.sender().objectName())
+        self.plot_action.emit(run_id)
 
     def on_stop_event(self,stop_btn, run_btn, rate_num, serial_port):
         self.enable_ui(True,stop_btn, run_btn, rate_num, serial_port)
-        stop_id = self.sender().objectName()
-        if stop_id in self._manager_dict.keys():
-            self.stop_processes(self._manager_dict[stop_id])
+        stop_id = int(self.sender().objectName())
+        self.stop_action.emit(stop_id)
 
     def enable_ui(self, e, stop_btn, run_btn, rate_num, serial_port):
         rate_num.setEnabled(e)
@@ -165,30 +147,3 @@ class GraphUi(QDialog):
         run_btn.setEnabled(e)
         stop_btn.setEnabled(not e)
 
-    def stop_processes(self, current_plot):
-        if current_plot.is_running():
-            current_plot.stop()
-
-    @pyqtSlot('QGridLayout', int, int, int, str, str, str, int)
-    def display(self, graph_display, index, width, height, xname, yname, title, key):
-        self.yname = yname
-        self.xname = xname
-        graph_display.setRowStretch(key, 3)
-        channel = self.addgraph(width, height, index, key, title)
-        graph_display.addWidget(channel, key, 0)
-        self.index = index
-
-    @pyqtSlot()
-    def clean_up(self):
-        if len(self._manager_dict) != 0 :
-            for plot_id in self._manager_dict.keys():
-                self.stop_processes(self._manager_dict[plot_id])
-            self._manager_dict.clear()
-
-    @pyqtSlot(int, int, int)
-    def plot_resize(self,w,h,flag):
-
-        for k in self.channel_dict.keys():
-            self.channel_dict[k][0].setFixedHeight(h)
-            self.channel_dict[k][0].setFixedWidth(w)
-            self.channel_dict[k][1].setFixedWidth(w*3/4)

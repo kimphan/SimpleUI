@@ -36,11 +36,11 @@ class Worker:
         self._parser = Parser(data=self._queue,
                               samples=self._samples,
                               rate=self._rate)
-        if self._graphid == 0:
+        if self._graphid == 2:
             self._process = RandomSimulator(self._parser)
         elif self._graphid == 1:
             self._process = SineSimulator(self._parser)
-        elif self._graphid == 2:
+        elif self._graphid == 0:
             self._process = Serial(self._parser)
         if self._process.check_init(port=self._port, speed=self._rate):
             self._parser.start()
@@ -73,7 +73,6 @@ class Worker:
                 self._lines = channel_num
         for c in range(self._lines):
             self._ybuffer[c].append(temp[c])
-
 
     def get_channel_num(self):
         return self._lines

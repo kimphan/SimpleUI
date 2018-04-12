@@ -21,14 +21,16 @@ class PlotManager(QObject):
 
         self._configure_timers()
         self.color_dict = ({0:'#6c6d70',1:'#EB340D',2:'#0D46EB', 3:'#d01bd3', 4:'#ed9615', 5: '#298909'})
+        self.subplot = False
 
     def start(self):
-        self._worker = Worker(graph_id=self._graph_id,
+        if not self.subplot:
+            self._worker = Worker(graph_id=self._graph_id,
                               samples=self._samples,
                               rate=self._rate,
                               port=self._port)
-        if self._worker.start():
-            self._timer_plot.start(20)
+            if self._worker.start():
+                self._timer_plot.start(20)
 
     def stop(self):
         self._timer_plot.stop()
@@ -47,21 +49,24 @@ class PlotManager(QObject):
             self._worker.get_plot_value()
             self._plot.plotItem.clear()
             count = self._worker.get_channel_num()
-            for i in range(count):
-                pen = pg.mkPen(self.color_dict[i], width=3, style=None)
-                self._plot.plotItem.plot(self._worker.getxbuffer(), self._worker.getybuffer(i), pen=pen)
+            if self.subplot:
+                pen = pg.mkPen(self.color_dict[0], width=3, style=None)
+                self._plot.plotItem.plot(self._worker.getxbuffer(), self._worker.getybuffer(0), pen=pen)
+            else:
+                for i in range(count):
+                    pen = pg.mkPen(self.color_dict[i], width=3, style=None)
+                    self._plot.plotItem.plot(self._worker.getxbuffer(), self._worker.getybuffer(i), pen=pen)
         else:
             print('Failed')
 
     def is_running(self):
         return self._worker.is_running()
 
-    def update_parameter(self,s,r):
+    def update_parameter(self,s,r,f=False):
         self._samples = int(s)
         self._rate = float(r)
+        self.subplot = f
 
-    def _readline(self):
-        return self._worker.get_channel_num()
 
 
 

@@ -52,7 +52,7 @@ class Serial(mp.Process):
             self._serial.baudrate = int(speed)
             self._serial.stopbits = serial.STOPBITS_ONE
             self._serial.bytesize = serial.EIGHTBITS
-            self._serial.timeout = 2
+            self._serial.timeout = 1
             return True
         else:
             return False
