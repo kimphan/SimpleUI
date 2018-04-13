@@ -11,7 +11,7 @@ class GraphUi(QDialog):
     rm_action = pyqtSignal(int)
     plot_action = pyqtSignal(int)
     stop_action = pyqtSignal(int)
-    subplot_action = pyqtSignal(str)
+    subplot_action = pyqtSignal(str,int, int,int)
 
     def __init__(self, graph_i=0, width=900, height=300, xn=None, yn=None, title=None, key=0):
         super(GraphUi,self).__init__()
@@ -172,4 +172,4 @@ class GraphUi(QDialog):
 
     def selectionChange(self,i):
         if i > 0:
-            self.subplot_action.emit(self.clist.currentText())
+            self.subplot_action.emit(self.clist.currentText(),self.key,self.graphID,i)

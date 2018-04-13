@@ -25,10 +25,12 @@ class ExampleUI (QMainWindow):
         self.plot_count = 0
         self.add = 0
         self.splot_count = 0
+        self.splot = -1
         self.addtopbottom = False
 
         self.store_graph = dict()
         self.store_plot = dict()
+        self.store_subplot = dict()
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -153,9 +155,9 @@ class ExampleUI (QMainWindow):
             self.addtopbottom = False
         self.channel_list.addItem(self.graph_type.currentText())
 
-        g = self.draw(self.channel_name.text())
+        g = self.draw(self.graph_type.currentIndex(),self.channel_name.text())
 
-        if g != None:
+        if g is not None:
             _plot_manager = PlotManager(g.graphID, g.sample_num.text(), g.rate_num.text(), g.serial_port.currentText(), g.plot)
             self.store_plot.update({self.key: _plot_manager})
 
@@ -163,7 +165,7 @@ class ExampleUI (QMainWindow):
         self.x_axis.setText('Time (s)')
         self.y_axis.clear()
 
-    def draw(self,graph_title):
+    def draw(self,graph_id,graph_title):
         if self.plot_count >= 3:
             message = QMessageBox.information(self, 'Message', 'Number of displayed graph exceeds the limit.', QMessageBox.Ok)
             if QMessageBox.Ok:
@@ -171,7 +173,7 @@ class ExampleUI (QMainWindow):
         else:
             self.plot_count += 1
             self.key += 1
-            graph = GraphUi(self.graph_type.currentIndex(),
+            graph = GraphUi(graph_id,
                         self.w / 5 * 3, self.h / 3,
                         self.x_axis.text(), self.y_axis.text(), graph_title,
                         self.key)
@@ -266,11 +268,13 @@ class ExampleUI (QMainWindow):
         self.plot(run_id)
 
     def plot(self,key):
-        print('plot')
         info = self.store_graph[key][0]
-        plot_manager= self.store_plot[key]
-        plot_manager.update_parameter(info.sample_num.text(), info.rate_num.text())
-        plot_manager.start()
+        if len(self.store_subplot)is not 0 and self.splot >=0:
+            self.store_subplot[key].update_plot(self.splot)
+        else:
+            plot_manager= self.store_plot[key]
+            plot_manager.update_parameter(info.sample_num.text(), info.rate_num.text())
+            plot_manager.start()
         info.enable_ui(False, info.stop_btn, info.run_btn, info.rate_num, info.serial_port)
 
     @pyqtSlot(int)
@@ -283,8 +287,18 @@ class ExampleUI (QMainWindow):
         if current_plot.is_running():
             current_plot.stop()
 
-    @pyqtSlot(str)
-    def subplot_selection(self, stitle):
-        self.draw(stitle)
+    @pyqtSlot(str,int,int,int)
+    def subplot_selection(self, stitle, key, gid, splot):
+        g = self.draw(gid,stitle)
+
+        self.splot = splot
+        print('splot {}'.format(splot))
+        if g is not None:
+            subplot = self.store_plot[key]
+            self.store_plot[key].plot = g.plot
+            self.store_plot[key].read_line = splot
+            self.store_plot[key].start()
+            self.store_subplot.update({self.key: subplot})
+
 
 
