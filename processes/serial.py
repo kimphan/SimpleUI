@@ -26,7 +26,7 @@ class Serial(mp.Process):
 
     def _is_ports_available(self, port):
         for p in self._os._scan_serial_port():
-            if port in p:
+            if port == p:
                 return True
         return False
 

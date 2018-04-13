@@ -74,6 +74,7 @@ class Worker:
         for c in range(self._lines):
             self._ybuffer[c].append(temp[c])
 
+
     def get_channel_num(self):
         return self._lines
 

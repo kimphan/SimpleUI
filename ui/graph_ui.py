@@ -4,21 +4,19 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QRect
 from helper.serial_scanner import SerialScan
 from manage.manager import PlotManager
 import pyqtgraph as pg
+import serial
 
 
 class GraphUi(QDialog):
     rm_action = pyqtSignal(int)
     plot_action = pyqtSignal(int)
     stop_action = pyqtSignal(int)
-
+    subplot_action = pyqtSignal(str)
 
     def __init__(self, graph_i=0, width=900, height=300, xn=None, yn=None, title=None, key=0):
         super(GraphUi,self).__init__()
-        self.channel_dict = dict()
-        self._manager_dict = dict()
-        self.channel_list = None
-        self._os = SerialScan()
-
+        self.scan = SerialScan()
+        self.list_ports = self.scan._scan_serial_port()
         self.add = 0
         self.graphID = graph_i
         self.width = width
@@ -26,36 +24,28 @@ class GraphUi(QDialog):
         self.xname = xn
         self.yname = yn
         self.graphName = title
-        self.dkey = key
-        self._plot = None
-        self._sample_num = None
-        self._rate_num = None
-        self._serial_port = None
-        self._run_btn = None
-        self._stop_btn = None
-        self._remove_btn = None
+        self.key = key
+        self.plot = None
+        self.sample_num = None
+        self.rate_num = None
+        self.serial_port = None
+        self.run_btn = None
+        self.stop_btn = None
+        self.remove_btn = None
+        self.clist = None
 
 
     def addgraph(self):
         # Setup widget
-        self._sample_num, self._rate_num, self._serial_port, self._run_btn, self._stop_btn = self._widget_config(self.dkey)
-        self._plot = self.plot_config(self.yname, self.xname)
-        self._plot.setMinimumWidth(self.width)
-        self._run_btn.pressed.connect(lambda: self.on_run_event(self.graphID, self._stop_btn, self._run_btn, self._rate_num, self._sample_num, self._serial_port, self._plot))
-        self._stop_btn.pressed.connect(lambda: self.on_stop_event(self._stop_btn, self._run_btn, self._rate_num, self._serial_port))
+        self._widget_config()
 
         # Qt Display
         layout = QHBoxLayout()
-        layout.addWidget(self._stop_btn)
-        layout.addWidget(self._run_btn)
-
-        self._remove_btn = QPushButton('Remove')
-        self._remove_btn.setObjectName(str(self.dkey))
-        self._remove_btn.setStyleSheet('font-size: 12pt;')
-        self._remove_btn.pressed.connect(self.on_remove_event)
+        layout.addWidget(self.stop_btn)
+        layout.addWidget(self.run_btn)
 
         graph_widget = QGroupBox(self.graphName)
-        graph_widget.setObjectName(str(self.dkey))
+        graph_widget.setObjectName(str(self.key))
         graph_widget.setStyleSheet('font-size: 12pt; font-style: bold; color: 606060;')
         graph_widget.setFixedHeight(self.height)
         graph_widget.setMinimumWidth(self.width)
@@ -65,60 +55,72 @@ class GraphUi(QDialog):
         sub_widget = QWidget()
         sub_layout = QFormLayout()
         sub_layout.setAlignment(Qt.AlignRight)
-        sub_layout.addRow(str('Sample: '), self._sample_num)
+        sub_layout.addRow(str('Sample: '), self.sample_num)
         if self.graphID==0:
-            self._rate_num.setText('115200')
-            sub_layout.addRow(str('Baudrate: '), self._rate_num)
-            sub_layout.addRow(str('Port: '), self._serial_port)
+            self.rate_num.setText('115200')
+            sub_layout.addRow(str('Baudrate: '), self.rate_num)
+            sub_layout.addRow(str('Port: '), self.serial_port)
+            sub_layout.addRow(str('Channel: '), self.clist)
         else:
-            sub_layout.addRow(str('Rate: '), self._rate_num)
+            sub_layout.addRow(str('Rate: '), self.rate_num)
+            if self.graphID==1:
+                sub_layout.addRow(str('Channel: '), self.clist)
 
         sub_layout.addRow(str(''),layout)
-        sub_layout.addRow(str(''),self._remove_btn)
+        sub_layout.addRow(str(''),self.remove_btn)
 
         sub_widget.setLayout(sub_layout)
 
-        graph_layout.addWidget(self._plot, 0, 0, 3, 1, Qt.AlignLeft)
+        graph_layout.addWidget(self.plot, 0, 0, 3, 1, Qt.AlignLeft)
         graph_layout.addWidget(sub_widget, 0, 1, 3, 1,Qt.AlignLeft)
 
         graph_widget.setLayout(graph_layout)
-        self.channel_dict.update({self.dkey: [graph_widget, self._plot]})
 
-        self.enable_ui(True,self._stop_btn, self._run_btn, self._rate_num, self._serial_port)
+        self.enable_ui(True,self.stop_btn, self.run_btn, self.rate_num, self.serial_port)
+        self.channel_scan()
         return graph_widget
 
 
-    def _widget_config(self,key):
-        # Other setup config
-        sample_num = QLineEdit()
-        sample_num.setText('500')
-        rate_num = QLineEdit()
-        rate_num.setText('0.02')
-
-        serial_port = QComboBox()
-        serial_port.setEditable(True)
-        serial_port.setFixedWidth(100)
-        for o in self._os._scan_serial_port():
-            serial_port.addItem(o)
-
-        run_btn = QPushButton('Run')
-        run_btn.setObjectName(str(key))
-        run_btn.setStyleSheet('font-size: 12pt;')
-
-        stop_btn = QPushButton('Stop')
-        stop_btn.setObjectName(str(key))
-        stop_btn.setStyleSheet('font-size: 12pt;')
-
-        return sample_num, rate_num, serial_port, run_btn, stop_btn
-
-    def plot_config(self, yname, xname):
+    def _widget_config(self):
         # Plot Widget config
-        plot = pg.PlotWidget(parent=None, background=pg.mkColor('#FFF'))
-        plot.setLabel('left', yname)
-        plot.setLabel('bottom', xname)
-        plot.setAntialiasing(True)
-        plot.plotItem.showGrid(True, True, 1)
-        return plot
+        self.plot = pg.PlotWidget(parent=None, background=pg.mkColor('#FFF'))
+        self.plot.setLabel('left', self.yname)
+        self.plot.setLabel('bottom', self.xname)
+        self.plot.setAntialiasing(True)
+        self.plot.setMinimumWidth(self.width)
+        self.plot.plotItem.showGrid(True, True, 1)
+        
+        # Other setup config
+        self.sample_num = QLineEdit()
+        self.sample_num.setText('100')
+        self.rate_num = QLineEdit()
+        self.rate_num.setText('0.02')
+
+        self.serial_port = QComboBox()
+        self.serial_port.setEditable(True)
+        self.serial_port.setFixedWidth(100)
+        for o in self.list_ports:
+            self.serial_port.addItem(o)
+
+        self.clist = QComboBox()
+        self.clist.setEditable(True)
+        self.clist.currentIndexChanged.connect(self.selectionChange)
+
+        self.run_btn = QPushButton('Run')
+        self.run_btn.setObjectName(str(self.key))
+        self.run_btn.setStyleSheet('font-size: 12pt;')
+
+        self.stop_btn = QPushButton('Stop')
+        self.stop_btn.setObjectName(str(self.key))
+        self.stop_btn.setStyleSheet('font-size: 12pt;')
+    
+        self.remove_btn = QPushButton('Remove')
+        self.remove_btn.setObjectName(str(self.key))
+        self.remove_btn.setStyleSheet('font-size: 12pt;')
+        
+        self.remove_btn.pressed.connect(self.on_remove_event)
+        self.run_btn.pressed.connect(self.on_run_event)
+        self.stop_btn.pressed.connect(self.on_stop_event)
 
     def make_connection(self, _object_):
         # _object_.add_button.connect(self.display)
@@ -131,13 +133,13 @@ class GraphUi(QDialog):
         self.rm_action.emit(remove_id)
 
     # Run button Handler
-    def on_run_event(self, i, stop_btn, run_btn, rate_num, sample_num, serial_port, plot):
-        self.enable_ui(False,stop_btn, run_btn, rate_num, serial_port)
+    def on_run_event(self):
+        self.enable_ui(False,self.stop_btn, self.run_btn, self.rate_num, self.serial_port)
         run_id = int(self.sender().objectName())
         self.plot_action.emit(run_id)
 
-    def on_stop_event(self,stop_btn, run_btn, rate_num, serial_port):
-        self.enable_ui(True,stop_btn, run_btn, rate_num, serial_port)
+    def on_stop_event(self):
+        self.enable_ui(True,self.stop_btn, self.run_btn, self.rate_num, self.serial_port)
         stop_id = int(self.sender().objectName())
         self.stop_action.emit(stop_id)
 
@@ -147,3 +149,27 @@ class GraphUi(QDialog):
         run_btn.setEnabled(e)
         stop_btn.setEnabled(not e)
 
+    def channel_scan(self):
+        if self.graphID==1:
+            c = 2
+        elif self.graphID == 0:
+            for p in self.list_ports:
+                try:
+                    ser = serial.Serial(port=p,baudrate=115200,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=1)
+                    if ser.is_open:
+                        line = ser.readline()
+                    values = line.decode("UTF-8").split(',')
+                    c = len(values)
+                    print('c {} line {}'.format(c,line))
+                    self.serial_port.setCurrentText(p)
+                except:
+                    print('Access denied')
+        else: c = -1
+        if c > 1:
+            self.clist.addItem('Both')
+            for i in range(c):
+                self.clist.addItem('Channel '+str(i+1))
+
+    def selectionChange(self,i):
+        if i > 0:
+            self.subplot_action.emit(self.clist.currentText())
