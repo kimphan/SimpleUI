@@ -160,8 +160,8 @@ class GraphUi(QDialog):
                         line = ser.readline()
                     values = line.decode("UTF-8").split(',')
                     c = len(values)
-                    print('c {} line {}'.format(c,line))
                     self.serial_port.setCurrentText(p)
+                    ser.close()
                 except:
                     print('Access denied')
         else: c = -1

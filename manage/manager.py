@@ -42,7 +42,6 @@ class PlotManager(QObject):
         self.timer_plot.timeout.connect(self.update_plot)
 
     def update_plot(self,read_line = -1):
-        print('readline {}'.format(read_line))
         if self.worker.is_running():
             self.worker.get_plot_value()
             self.plot.plotItem.clear()
@@ -55,7 +54,8 @@ class PlotManager(QObject):
                 pen = pg.mkPen(self.color_dict[self.read_line-1], width=1, style=None)
                 self.plot.plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(0), pen=pen)
         else:
-            print('Failed')
+            self.stop()
+            print('Manager fail to open port')
 
     def is_running(self):
         return self.worker.is_running()

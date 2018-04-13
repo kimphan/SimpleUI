@@ -35,14 +35,12 @@ class Serial(mp.Process):
             if not self._serial.is_open:
                 try:
                     self._serial.open()
-                    t = time()
-                    while not self._exit.is_set():
-                        line = self._serial.readline()
-                        self._parser.add([time()-t, line])
-                    self._serial.close()
+                    self.readByte()
                 except serial.SerialException:
                     print('cant open port')
                     self._serial.close()
+            else:
+                self.readByte()
         else:
             print('Port is not available.')
 
@@ -61,7 +59,12 @@ class Serial(mp.Process):
         print('serial stop')
         self._exit.set()
 
-
+    def readByte(self):
+        t = time()
+        while not self._exit.is_set():
+            line = self._serial.readline()
+            self._parser.add([time()-t, line])
+        self._serial.close()
 
 
 

@@ -243,6 +243,9 @@ class ExampleUI (QMainWindow):
                         self.add = 1  # add top and bottom
             self.store_graph[rm_id][1].close()
             del self.store_graph[rm_id]
+            if rm_id in self.store_plot.keys():
+                self.stop_processes(self.store_plot[rm_id])
+                del self.store_plot[rm_id]
         elif (m == message.No):
             pass
 
@@ -269,12 +272,9 @@ class ExampleUI (QMainWindow):
 
     def plot(self,key):
         info = self.store_graph[key][0]
-        if len(self.store_subplot)is not 0 and self.splot >=0:
-            self.store_subplot[key].update_plot(self.splot)
-        else:
-            plot_manager= self.store_plot[key]
-            plot_manager.update_parameter(info.sample_num.text(), info.rate_num.text())
-            plot_manager.start()
+        plot_manager= self.store_plot[key]
+        plot_manager.update_parameter(info.sample_num.text(), info.rate_num.text())
+        plot_manager.start()
         info.enable_ui(False, info.stop_btn, info.run_btn, info.rate_num, info.serial_port)
 
     @pyqtSlot(int)
@@ -291,14 +291,11 @@ class ExampleUI (QMainWindow):
     def subplot_selection(self, stitle, key, gid, splot):
         g = self.draw(gid,stitle)
 
-        self.splot = splot
-        print('splot {}'.format(splot))
         if g is not None:
-            subplot = self.store_plot[key]
-            self.store_plot[key].plot = g.plot
-            self.store_plot[key].read_line = splot
-            self.store_plot[key].start()
-            self.store_subplot.update({self.key: subplot})
+            _plot_manager = PlotManager(g.graphID, g.sample_num.text(), g.rate_num.text(), g.serial_port.currentText(), g.plot)
+            _plot_manager.read_line = splot
+            _plot_manager.start()
+            self.store_plot.update({self.key: _plot_manager})
 
 
 
