@@ -158,7 +158,7 @@ class ExampleUI (QMainWindow):
         g = self.draw(self.graph_type.currentIndex(),self.channel_name.text())
         if g is not None:
             _plot_manager = PlotManager(g.graphID, g.sample_num.text(), g.rate_num.text(), g.serial_port.currentText(), g.plot)
-            _plot_manager.make_connection(g)
+            # _plot_manager.make_connection(g)
             self.store_plot.update({self.key: _plot_manager})
             self.plot(self.key)
 
@@ -294,5 +294,8 @@ class ExampleUI (QMainWindow):
     @pyqtSlot(str,int,int,int)
     def subplot_selection(self, stitle, key, gid, splot):
         g = self.draw(gid,stitle)
+        g.control_panel.deleteLater()
+        g.control_panel.update()
+        self.store_plot[key].plot.append(g.plot)
 
 

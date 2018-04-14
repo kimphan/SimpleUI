@@ -33,14 +33,20 @@ class Parser(mp.Process):
     def stop(self):
         self._exit.set()
 
+    # Collect raw data in _importQ
     def add(self, data):
         self._importQ.put(data)
 
+    # Export data from serial port to worker
+    # Raw data from Serial/Simulator process is collected in _importQ
+    # Helper function: parse_data
+    # Output queue: _exportQ
     def _get_data(self):
         while not self._importQ.empty():
             queue = self._importQ.get(timeout=0.05)
             self.parse_data(queue[0], queue[1])
 
+    # Convert and Export data in _importQ to _exportQ
     def parse_data(self, t, line):
         if len(line) > 0:
             try:

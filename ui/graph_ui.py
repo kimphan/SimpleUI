@@ -12,7 +12,6 @@ class GraphUi(QDialog):
     plot_action = pyqtSignal(int)
     stop_action = pyqtSignal(int)
     subplot_draw = pyqtSignal(str,int, int,int)
-    subplot = pyqtSignal(int)
 
     def __init__(self, graph_i=0, width=900, height=300, xn=None, yn=None, title=None, key=0):
         super(GraphUi,self).__init__()
@@ -177,6 +176,5 @@ class GraphUi(QDialog):
         if i > 0:
             # Draw the child graph
             self.subplot_draw.emit(self.clist.currentText(),self.key,self.graphID,i)
-            self.subplot.emit(i)
 
 

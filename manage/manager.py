@@ -1,6 +1,6 @@
 """
 PlotManager:
-    Role: plot data
+    Role: manage data to plot
     References:
         https://github.com/ssepulveda/RTGraph
 """
@@ -18,11 +18,11 @@ class PlotManager(QObject):
         self.samples = int(samples)
         self.rate = float(rate)
         self.port = port
-        self.plot = plot_widget
+        self.plot = []
+        self.plot.append(plot_widget)
 
         self.configure_timers()
         self.color_dict = ({0:'#6c6d70',1:'#EB340D',2:'#0D46EB', 3:'#d01bd3', 4:'#ed9615', 5: '#298909'})
-        self.read_channel = 0
 
     def start(self):
         self.worker = Worker(graph_id=self.graph_id,samples=self.samples,rate=self.rate,port=self.port)
@@ -45,15 +45,22 @@ class PlotManager(QObject):
     def update_plot(self,read_line = -1):
         if self.worker.is_running():
             self.worker.get_plot_value()
-            self.plot.plotItem.clear()
-            if self.read_channel == 0:
-                count = self.worker.get_channel_num()
-                for i in range(count):
-                    pen = pg.mkPen(self.color_dict[i], width=1, style=None)
-                    self.plot.plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(i), pen=pen)
-            else:
-                pen = pg.mkPen(self.color_dict[self.read_channel-1], width=1, style=None)
-                self.plot.plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(self.read_channel-1), pen=pen)
+            widget_num = len(self.plot)
+            count = self.worker.get_channel_num()
+            c = 1
+            # Clear all data before plot
+            for p in self.plot:
+                p.plotItem.clear()
+            # Plot data
+            # Plot all channel in 1 graph
+            for i in range(count):
+                pen = pg.mkPen(self.color_dict[i], width=1, style=None)
+                self.plot[0].plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(i), pen=pen)
+            # Individual plot
+            while c <= widget_num-1:
+                pen = pg.mkPen(self.color_dict[c-1], width=1, style=None)
+                self.plot[c].plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(c-1), pen=pen)
+                c += 1
         else:
             self.stop()
             print('Manager fail to open port')
@@ -64,14 +71,9 @@ class PlotManager(QObject):
     def update_parameter(self,s,r):
         self.samples = int(s)
         self.rate = float(r)
-        print('manager update')
+        print('Manager update')
 
-    def make_connection(self, obj):
-        obj.subplot.connect(self.channelplot)
 
-    @pyqtSlot(int)
-    def channelplot(self, channel):
-        self.read_channel = channel
 
 
 

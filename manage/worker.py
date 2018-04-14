@@ -58,6 +58,12 @@ class Worker:
                 process.stop()
                 process.join(1000)
 
+    # Distributed collected data into separate buffers
+    # Maximum channel allows is 6
+    # Helper function: distribute_value
+    # Input: data queue from Parser process (_queue)
+    # Output: x-axis: _xbuffer (time)
+    #         y-axis: _ybuffer (data from channel)
     def get_plot_value(self):
         while not self._queue.empty():
             self.distribute_values(self._queue.get_nowait())
@@ -74,13 +80,15 @@ class Worker:
         for c in range(self._lines):
             self._ybuffer[c].append(temp[c])
 
-
+    # Return number of channel is read from Serial/Simulator process
     def get_channel_num(self):
         return self._lines
 
+    # Get timer value
     def getxbuffer(self):
         return self._xbuffer.get_all()
 
+    # Get processes' data
     def getybuffer(self, i):
         return self._ybuffer[i].get_all()
 
