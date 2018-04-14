@@ -11,7 +11,8 @@ class GraphUi(QDialog):
     rm_action = pyqtSignal(int)
     plot_action = pyqtSignal(int)
     stop_action = pyqtSignal(int)
-    subplot_action = pyqtSignal(str,int, int,int)
+    subplot_draw = pyqtSignal(str,int, int,int)
+    subplot = pyqtSignal(int)
 
     def __init__(self, graph_i=0, width=900, height=300, xn=None, yn=None, title=None, key=0):
         super(GraphUi,self).__init__()
@@ -25,6 +26,7 @@ class GraphUi(QDialog):
         self.yname = yn
         self.graphName = title
         self.key = key
+        self.control_panel = QFormLayout()
         self.plot = None
         self.sample_num = None
         self.rate_num = None
@@ -33,6 +35,7 @@ class GraphUi(QDialog):
         self.stop_btn = None
         self.remove_btn = None
         self.clist = None
+        self.plot_manager = None
 
 
     def addgraph(self):
@@ -53,23 +56,23 @@ class GraphUi(QDialog):
         graph_layout = QGridLayout()
 
         sub_widget = QWidget()
-        sub_layout = QFormLayout()
-        sub_layout.setAlignment(Qt.AlignRight)
-        sub_layout.addRow(str('Sample: '), self.sample_num)
+        self.control_panel = QFormLayout()
+        self.control_panel.setAlignment(Qt.AlignRight)
+        self.control_panel.addRow(str('Sample: '), self.sample_num)
         if self.graphID==0:
             self.rate_num.setText('115200')
-            sub_layout.addRow(str('Baudrate: '), self.rate_num)
-            sub_layout.addRow(str('Port: '), self.serial_port)
-            sub_layout.addRow(str('Channel: '), self.clist)
+            self.control_panel.addRow(str('Baudrate: '), self.rate_num)
+            self.control_panel.addRow(str('Port: '), self.serial_port)
+            self.control_panel.addRow(str('Channel: '), self.clist)
         else:
-            sub_layout.addRow(str('Rate: '), self.rate_num)
+            self.control_panel.addRow(str('Rate: '), self.rate_num)
             if self.graphID==1:
-                sub_layout.addRow(str('Channel: '), self.clist)
+                self.control_panel.addRow(str('Channel: '), self.clist)
 
-        sub_layout.addRow(str(''),layout)
-        sub_layout.addRow(str(''),self.remove_btn)
+        self.control_panel.addRow(str(''),layout)
+        self.control_panel.addRow(str(''),self.remove_btn)
 
-        sub_widget.setLayout(sub_layout)
+        sub_widget.setLayout(self.control_panel)
 
         graph_layout.addWidget(self.plot, 0, 0, 3, 1, Qt.AlignLeft)
         graph_layout.addWidget(sub_widget, 0, 1, 3, 1,Qt.AlignLeft)
@@ -172,4 +175,8 @@ class GraphUi(QDialog):
 
     def selectionChange(self,i):
         if i > 0:
-            self.subplot_action.emit(self.clist.currentText(),self.key,self.graphID,i)
+            # Draw the child graph
+            self.subplot_draw.emit(self.clist.currentText(),self.key,self.graphID,i)
+            self.subplot.emit(i)
+
+

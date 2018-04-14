@@ -5,7 +5,7 @@ PlotManager:
         https://github.com/ssepulveda/RTGraph
 """
 import pyqtgraph as pg
-from PyQt5.QtCore import QTimer,pyqtSignal,QObject
+from PyQt5.QtCore import QTimer,pyqtSlot,QObject
 from manage.worker import Worker
 
 class PlotManager(QObject):
@@ -22,12 +22,13 @@ class PlotManager(QObject):
 
         self.configure_timers()
         self.color_dict = ({0:'#6c6d70',1:'#EB340D',2:'#0D46EB', 3:'#d01bd3', 4:'#ed9615', 5: '#298909'})
-        self.read_line = -1
+        self.read_channel = 0
 
     def start(self):
         self.worker = Worker(graph_id=self.graph_id,samples=self.samples,rate=self.rate,port=self.port)
         if self.worker.start():
             self.timer_plot.start(20)
+
 
     def stop(self):
         self.timer_plot.stop()
@@ -45,14 +46,14 @@ class PlotManager(QObject):
         if self.worker.is_running():
             self.worker.get_plot_value()
             self.plot.plotItem.clear()
-            count = self.worker.get_channel_num()
-            if self.read_line < 0:
+            if self.read_channel == 0:
+                count = self.worker.get_channel_num()
                 for i in range(count):
                     pen = pg.mkPen(self.color_dict[i], width=1, style=None)
                     self.plot.plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(i), pen=pen)
             else:
-                pen = pg.mkPen(self.color_dict[self.read_line-1], width=1, style=None)
-                self.plot.plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(0), pen=pen)
+                pen = pg.mkPen(self.color_dict[self.read_channel-1], width=1, style=None)
+                self.plot.plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(self.read_channel-1), pen=pen)
         else:
             self.stop()
             print('Manager fail to open port')
@@ -64,6 +65,14 @@ class PlotManager(QObject):
         self.samples = int(s)
         self.rate = float(r)
         print('manager update')
+
+    def make_connection(self, obj):
+        obj.subplot.connect(self.channelplot)
+
+    @pyqtSlot(int)
+    def channelplot(self, channel):
+        self.read_channel = channel
+
 
 
 

@@ -6,6 +6,7 @@ from manage.manager import PlotManager
 from helper.serial_scanner import SerialScan
 import os, signal,serial
 
+
 class ExampleUI (QMainWindow):
     LABELFONT = 15
     add_button = pyqtSignal('QGridLayout', int, int, int, str, str, str, int)
@@ -148,7 +149,6 @@ class ExampleUI (QMainWindow):
     def on_add_event(self):
         sending_button = self.sender()
         self.statusBar().showMessage('{}'.format(sending_button.text()))
-        print('here')
         # Add 1 on top and 1 in bottom
         if self.addtopbottom and self.key == 1:
             self.key = 2
@@ -156,10 +156,11 @@ class ExampleUI (QMainWindow):
         self.channel_list.addItem(self.graph_type.currentText())
 
         g = self.draw(self.graph_type.currentIndex(),self.channel_name.text())
-
         if g is not None:
             _plot_manager = PlotManager(g.graphID, g.sample_num.text(), g.rate_num.text(), g.serial_port.currentText(), g.plot)
+            _plot_manager.make_connection(g)
             self.store_plot.update({self.key: _plot_manager})
+            self.plot(self.key)
 
         self.channel_name.clear()
         self.x_axis.setText('Time (s)')
@@ -177,10 +178,12 @@ class ExampleUI (QMainWindow):
                         self.w / 5 * 3, self.h / 3,
                         self.x_axis.text(), self.y_axis.text(), graph_title,
                         self.key)
+
             self.graph_display.setRowStretch(self.key, 3)
             draw_graph = graph.addgraph()
             self.graph_display.addWidget(draw_graph, self.key, 0)
             self.make_connection(graph)
+
             self.store_graph.update({self.key: [graph, draw_graph]})
         return graph
 
@@ -188,7 +191,8 @@ class ExampleUI (QMainWindow):
         _object_.rm_action.connect(self.remove_plot)
         _object_.plot_action.connect(self.plot_data)
         _object_.stop_action.connect(self.stop_plot)
-        _object_.subplot_action.connect(self.subplot_selection)
+        _object_.subplot_draw.connect(self.subplot_selection)
+
 
     def closeEvent(self, event):
         if len(self.store_plot) != 0 :
@@ -290,12 +294,5 @@ class ExampleUI (QMainWindow):
     @pyqtSlot(str,int,int,int)
     def subplot_selection(self, stitle, key, gid, splot):
         g = self.draw(gid,stitle)
-
-        if g is not None:
-            _plot_manager = PlotManager(g.graphID, g.sample_num.text(), g.rate_num.text(), g.serial_port.currentText(), g.plot)
-            _plot_manager.read_line = splot
-            _plot_manager.start()
-            self.store_plot.update({self.key: _plot_manager})
-
 
 

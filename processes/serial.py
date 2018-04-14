@@ -37,7 +37,7 @@ class Serial(mp.Process):
                     self._serial.open()
                     self.readByte()
                 except serial.SerialException:
-                    print('cant open port')
+                    print('Cannot open port')
                     self._serial.close()
             else:
                 self.readByte()
