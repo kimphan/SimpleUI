@@ -8,6 +8,7 @@ import pyqtgraph as pg
 from PyQt5.QtCore import QTimer,pyqtSlot,QObject
 from manage.worker import Worker
 
+
 class PlotManager(QObject):
 
     def __init__(self, g_id=0, samples=500, rate=0.02, port=None, plot_widget=None):

@@ -6,6 +6,8 @@ Worker:
     Credit for:
         https://github.com/ssepulveda/RTGraph
 """
+import numpy as np
+from scipy.signal import *
 from processes.parser import *
 from helper.ringBuffer import *
 from processes.simulator import *
@@ -88,9 +90,12 @@ class Worker:
     def getxbuffer(self):
         return self._xbuffer.get_all()
 
-    # Get processes' data
+    # Get raw data from sensors and compute
+    # Computation: apply Savitzky-Golay filter and normalize the signal by subtracting with its mean
     def getybuffer(self, i):
-        return self._ybuffer[i].get_all()
+        sgf = savgol_filter(self._ybuffer[i].get_all(),polyorder=3,window_length=37)
+        norm = sgf - np.mean(sgf)
+        return norm
 
     def is_running(self):
         return self._process is not None and self._process.is_alive()
