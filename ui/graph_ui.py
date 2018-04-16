@@ -79,7 +79,6 @@ class GraphUi(QDialog):
         graph_widget.setLayout(graph_layout)
 
         self.enable_ui(True,self.stop_btn, self.run_btn, self.rate_num, self.serial_port)
-        self.channel_scan()
         return graph_widget
 
 

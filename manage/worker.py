@@ -7,7 +7,7 @@ Worker:
         https://github.com/ssepulveda/RTGraph
 """
 import numpy as np
-from scipy.signal import *
+from scipy.signal import correlate,savgol_filter
 from processes.parser import *
 from helper.ringBuffer import *
 from processes.simulator import *
@@ -94,8 +94,12 @@ class Worker:
     # Computation: apply Savitzky-Golay filter and normalize the signal by subtracting with its mean
     def getybuffer(self, i):
         sgf = savgol_filter(self._ybuffer[i].get_all(),polyorder=3,window_length=37)
-        norm = sgf - np.mean(sgf)
-        return norm
+        ynorm = sgf - np.mean(sgf)
+        xnorm = self._xbuffer.get_all() - np.mean(self._xbuffer.get_all())
+        autocorr = correlate(xnorm,ynorm,'same','auto')
+        # lag = np.argmax(correlate(a_sig, b_sig))
+        # c_sig = np.roll(b_sig, shift=int(np.ceil(lag)))
+        return autocorr
 
     def is_running(self):
         return self._process is not None and self._process.is_alive()

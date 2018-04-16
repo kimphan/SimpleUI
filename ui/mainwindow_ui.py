@@ -157,6 +157,7 @@ class ExampleUI (QMainWindow):
 
         g = self.draw(self.graph_type.currentIndex(),self.channel_name.text())
         if g is not None:
+            g.channel_scan()
             _plot_manager = PlotManager(g.graphID, g.sample_num.text(), g.rate_num.text(), g.serial_port.currentText(), g.plot)
             # _plot_manager.make_connection(g)
             self.store_plot.update({self.key: _plot_manager})
@@ -220,7 +221,7 @@ class ExampleUI (QMainWindow):
         for k in self.store_graph.keys():
             self.store_graph[k][1].setFixedHeight(h)
             self.store_graph[k][1].setFixedWidth(w)
-            self.store_graph[k][0]._plot.setFixedWidth(w*3/4)
+            self.store_graph[k][0].plot.setFixedWidth(w*3/4)
 
     @pyqtSlot(int)
     def remove_plot(self,rm_id):
