@@ -95,8 +95,7 @@ class Worker:
     def getybuffer(self, i):
         sgf = savgol_filter(self._ybuffer[i].get_all(),polyorder=3,window_length=37)
         ynorm = sgf - np.mean(sgf)
-        xnorm = self._xbuffer.get_all() - np.mean(self._xbuffer.get_all())
-        autocorr = correlate(xnorm,ynorm,'same','auto')
+        autocorr = correlate(ynorm,ynorm,'same','auto')
         # lag = np.argmax(correlate(a_sig, b_sig))
         # c_sig = np.roll(b_sig, shift=int(np.ceil(lag)))
         return autocorr
