@@ -53,7 +53,6 @@ class ExampleUI (QMainWindow):
         self.y_axis = QLineEdit()
 
         self.x_axis.setText('Time (s)')
-        # self.channel_list.currentTextChanged.connect(self.selectionChange)
 
         # Graph type list for displaying option
         self.graph_type.addItem('Serial')
