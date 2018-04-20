@@ -58,18 +58,18 @@ class ExampleUI (QMainWindow):
         self.graph_type.addItem('Serial')
         self.graph_type.addItem('Sine Simulator')
         self.graph_type.addItem('Random Plot')
-
-        vertical_menu = QVBoxLayout()
-        vertical_menu.setAlignment(Qt.AlignLeft)
-        vertical_menu.SetFixedSize
-
-        channel_select = QGroupBox('Channel Select')
-        channel_select.setStyleSheet('font-size: 12pt; color: 606060;')
-        selectC = QHBoxLayout()
-        selectC.addWidget(self.channel_list)
-        channel_select.setLayout(selectC)
-        channel_select.setFixedWidth(self.w/5)
-        channel_select.setFixedHeight(self.h/8)
+        #
+        # vertical_menu = QVBoxLayout()
+        # vertical_menu.setAlignment(Qt.AlignLeft)
+        # vertical_menu.SetFixedSize
+        #
+        # channel_select = QGroupBox('Channel Select')
+        # channel_select.setStyleSheet('font-size: 12pt; color: 606060;')
+        # selectC = QHBoxLayout()
+        # selectC.addWidget(self.channel_list)
+        # channel_select.setLayout(selectC)
+        # channel_select.setFixedWidth(self.w/5)
+        # channel_select.setFixedHeight(self.h/8)
 
         add_channel = QGroupBox('Add Channel')
         add_channel.setStyleSheet('font-size: 12pt; color: 606060;')
@@ -83,14 +83,14 @@ class ExampleUI (QMainWindow):
         add_channel.setLayout(addC)
         add_channel.setFixedWidth(self.w/5)
 
-        vertical_menu.addWidget(channel_select)
-        vertical_menu.addWidget(add_channel)
+        # vertical_menu.addWidget(channel_select)
+        # vertical_menu.addWidget(add_channel)
 
         self.graph_display = QGridLayout()
         self.graph_display.setAlignment(Qt.AlignTop)
         self.graph_display.SetFixedSize
 
-        self.windowLayout.addLayout(vertical_menu)
+        self.windowLayout.addWidget(add_channel)
         self.windowLayout.addLayout(self.graph_display)
         self.windowLayout.addStretch()
 
