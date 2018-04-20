@@ -50,7 +50,7 @@ class GraphUi(QDialog):
         graph_widget.setObjectName(str(self.key))
         graph_widget.setStyleSheet('font-size: 12pt; font-style: bold; color: 606060;')
         graph_widget.setFixedHeight(self.height)
-        graph_widget.setMinimumWidth(self.width)
+        graph_widget.setFixedWidth(self.width)
 
         graph_layout = QGridLayout()
 
@@ -88,7 +88,7 @@ class GraphUi(QDialog):
         self.plot.setLabel('left', self.yname)
         self.plot.setLabel('bottom', self.xname)
         self.plot.setAntialiasing(True)
-        self.plot.setMinimumWidth(self.width)
+        self.plot.setMinimumWidth(self.width*3/4)
         self.plot.plotItem.showGrid(True, True, 1)
         
         # Other setup config

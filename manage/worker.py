@@ -31,9 +31,15 @@ class Worker:
         self._ybuffer = None
         self.plist = None
 
+        self.lags = None
+        self.ynorm = None
+        self.autocorr= None
+
     def start(self):
         # Reset and Initialize buffers data
         self._xbuffer, self._ybuffer, self._queue = self.clear_queue(self._samples,self._queue)
+        self.lags = RingBuffer(self._samples)
+        self.autocorr = RingBuffer(self._samples)
         self.plist = []
         self._parser = Parser(data=self._queue,
                               samples=self._samples,
@@ -88,16 +94,20 @@ class Worker:
 
     # Get timer value
     def getxbuffer(self):
-        return self._xbuffer.get_all()
+        # Normalize time values where the autocorrelation values are found
+        xnorm = self._xbuffer.get_all() - np.mean(self._xbuffer.get_all())
+        return xnorm
 
     # Get raw data from sensors and compute
-    # Computation: apply Savitzky-Golay filter and normalize the signal by subtracting with its mean
+    # Computation: filter raw data using Saviztky-Golay method
+    #              detect the randomness in data with autocorrelation coefficient function
+    #  Note: Lag value is an integer denoting how many time steps separate one value form another.
+    #        Testing for randomness, need only one value of autocorrelation coefficient using lag k = 1
     def getybuffer(self, i):
-        sgf = savgol_filter(self._ybuffer[i].get_all(),polyorder=3,window_length=37)
-        ynorm = sgf - np.mean(sgf)
-        autocorr = correlate(ynorm,ynorm,'same','auto')
-        # lag = np.argmax(correlate(a_sig, b_sig))
-        # c_sig = np.roll(b_sig, shift=int(np.ceil(lag)))
+        sgf = savgol_filter(self._ybuffer[i].get_all(),polyorder=3,window_length=37) # Filter the raw data
+        ynorm = sgf - np.mean(sgf) # Normalize data
+        y1 = np.sum(ynorm**2)      # Lag value at k=1
+        autocorr = correlate(ynorm,ynorm,mode='same')/y1  # autocorrelation coefficient
         return autocorr
 
     def is_running(self):

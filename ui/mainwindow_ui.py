@@ -13,7 +13,7 @@ class ExampleUI (QMainWindow):
 
     def __init__(self):
         super(ExampleUI, self).__init__()
-        self.w = 1200
+        self.w = 1300
         self.h = 700
         self.setMinimumHeight(self.h+100)
         self.setMinimumWidth(self.w)
@@ -75,7 +75,7 @@ class ExampleUI (QMainWindow):
         add_channel = QGroupBox('Add Channel')
         add_channel.setStyleSheet('font-size: 12pt; color: 606060;')
         addC = QFormLayout()
-        addC.addRow(str('Graph type: '), self.graph_type)
+        addC.addRow(str('Source Type: '), self.graph_type)
         addC.addRow(str('Channel Name: '), self.channel_name)
         addC.addRow(str('x-Axis: '), self.x_axis)
         addC.addRow(str('y-Axis: '), self.y_axis)
@@ -93,6 +93,7 @@ class ExampleUI (QMainWindow):
 
         self.windowLayout.addLayout(vertical_menu)
         self.windowLayout.addLayout(self.graph_display)
+        self.windowLayout.addStretch()
 
     # Label
     @staticmethod
@@ -111,7 +112,6 @@ class ExampleUI (QMainWindow):
         self.move(frame.topLeft())  # move the top-left point of the application window to the 'qr'
 
         # Menu bar
-
     def mymenu(self):
         saveaction = self.actiondef('Save', QKeySequence.Save, self.saveact)
         editaction = self.actiondef('Edit', QKeySequence.Back, self.editact)
@@ -176,7 +176,7 @@ class ExampleUI (QMainWindow):
             self.plot_count += 1
             self.key += 1
             graph = GraphUi(graph_id,
-                        self.w / 5 * 3, self.h / 3,
+                        self.w / 5 * 4, self.h / 3,
                         self.x_axis.text(), self.y_axis.text(), graph_title,
                         self.key)
 
@@ -212,7 +212,7 @@ class ExampleUI (QMainWindow):
                 self.resize_plot(self.w/5*4, self.h/3)
             else:
                 self.h = 700
-                self.w = 1200
+                self.w = 1300
                 self.resize_plot(self.w/5*4, self.h/3)
 
         super(ExampleUI,self).changeEvent(event)
