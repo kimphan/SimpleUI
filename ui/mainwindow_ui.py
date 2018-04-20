@@ -46,45 +46,45 @@ class ExampleUI (QMainWindow):
         add_btn = self.button('Add', self.on_add_event)
         add_btn.setMaximumWidth(80)
 
+        edit_cname = self.button('Change',self.edit_name)
+        edit_cname.setMaximumWidth(70)
+
         self.channel_list = QComboBox()
         self.graph_type = QComboBox()
+        self.list_port = QComboBox()
         self.channel_name = QLineEdit()
-        self.x_axis = QLineEdit()
-        self.y_axis = QLineEdit()
+        self.baudrate = QLineEdit()
+        self.mode1 = QRadioButton('Raw data')
+        self.mode2 = QRadioButton('Randomness Test')
 
-        self.x_axis.setText('Time (s)')
+        self.mode1.setChecked(True)
 
         # Graph type list for displaying option
         self.graph_type.addItem('Serial')
         self.graph_type.addItem('Sine Simulator')
         self.graph_type.addItem('Random Plot')
-        #
-        # vertical_menu = QVBoxLayout()
-        # vertical_menu.setAlignment(Qt.AlignLeft)
-        # vertical_menu.SetFixedSize
-        #
-        # channel_select = QGroupBox('Channel Select')
-        # channel_select.setStyleSheet('font-size: 12pt; color: 606060;')
-        # selectC = QHBoxLayout()
-        # selectC.addWidget(self.channel_list)
-        # channel_select.setLayout(selectC)
-        # channel_select.setFixedWidth(self.w/5)
-        # channel_select.setFixedHeight(self.h/8)
+
+        group_cwidget = QHBoxLayout()
+        group_cwidget.addWidget(self.channel_list)
+        group_cwidget.addWidget(edit_cname)
+
+        display_mode = QVBoxLayout()
+        display_mode.addWidget(self.mode1)
+        display_mode.addWidget(self.mode2)
 
         add_channel = QGroupBox('Add Channel')
         add_channel.setStyleSheet('font-size: 12pt; color: 606060;')
         addC = QFormLayout()
-        addC.addRow(str('Source Type: '), self.graph_type)
-        addC.addRow(str('Channel Name: '), self.channel_name)
-        addC.addRow(str('x-Axis: '), self.x_axis)
-        addC.addRow(str('y-Axis: '), self.y_axis)
-        addC.addRow(str(''), add_btn)
+        addC.addRow('Source Type: ', self.graph_type)
+        addC.addRow('Plot Name: ', self.channel_name)
+        addC.addRow('Port: ', self.list_port)
+        addC.addRow('Baudrate: ', self.baudrate)
+        addC.addRow('Channel: ', group_cwidget)
+        addC.addRow('Display Mode: ', display_mode)
+        addC.addRow('', add_btn)
 
         add_channel.setLayout(addC)
-        add_channel.setFixedWidth(self.w/5)
-
-        # vertical_menu.addWidget(channel_select)
-        # vertical_menu.addWidget(add_channel)
+        add_channel.setFixedWidth(self.w/4)
 
         self.graph_display = QGridLayout()
         self.graph_display.setAlignment(Qt.AlignTop)
@@ -104,6 +104,7 @@ class ExampleUI (QMainWindow):
         return lbl
 
     # Put the application window in the center of the screen
+    # Credit from: http://zetcode.com/gui/pyqt5/firstprograms/
     def center(self):
         frame = self.frameGeometry()  # specifying geometry of the main window with a rectangle 'qr'
         cp = QDesktopWidget().availableGeometry().center()  # screen size resolution+get the center point
@@ -111,6 +112,7 @@ class ExampleUI (QMainWindow):
         self.move(frame.topLeft())  # move the top-left point of the application window to the 'qr'
 
         # Menu bar
+
     def mymenu(self):
         saveaction = self.actiondef('Save', QKeySequence.Save, self.saveact)
         editaction = self.actiondef('Edit', QKeySequence.Back, self.editact)
@@ -145,6 +147,9 @@ class ExampleUI (QMainWindow):
         btn.pressed.connect(handler)
         return btn
 
+    def edit_name(self):
+        pass
+
     def on_add_event(self):
         sending_button = self.sender()
         self.statusBar().showMessage('{}'.format(sending_button.text()))
@@ -175,7 +180,7 @@ class ExampleUI (QMainWindow):
             self.plot_count += 1
             self.key += 1
             graph = GraphUi(graph_id,
-                        self.w / 5 * 4, self.h / 3,
+                        self.w * 3/4, self.h/3,
                         self.x_axis.text(), self.y_axis.text(), graph_title,
                         self.key)
 
@@ -208,11 +213,11 @@ class ExampleUI (QMainWindow):
                 screen_resolution = qApp.desktop().screenGeometry()
                 self.w, self.h = screen_resolution.width(), screen_resolution.height()
                 self.h -= 100
-                self.resize_plot(self.w/5*4, self.h/3)
+                self.resize_plot(self.w*3/4, self.h/3)
             else:
                 self.h = 700
                 self.w = 1300
-                self.resize_plot(self.w/5*4, self.h/3)
+                self.resize_plot(self.w*3/4, self.h/3)
 
         super(ExampleUI,self).changeEvent(event)
 

@@ -60,13 +60,13 @@ class GraphUi(QDialog):
         self.control_panel.addRow(str('Sample: '), self.sample_num)
         if self.graphID==0:
             self.rate_num.setText('115200')
-            self.control_panel.addRow(str('Baudrate: '), self.rate_num)
-            self.control_panel.addRow(str('Port: '), self.serial_port)
-            self.control_panel.addRow(str('Channel: '), self.clist)
+            self.control_panel.addRow('Baudrate: ', self.rate_num)
+            self.control_panel.addRow('Port: ', self.serial_port)
+            self.control_panel.addRow('Channel: ', self.clist)
         else:
-            self.control_panel.addRow(str('Rate: '), self.rate_num)
+            self.control_panel.addRow('Rate: ', self.rate_num)
             if self.graphID==1:
-                self.control_panel.addRow(str('Channel: '), self.clist)
+                self.control_panel.addRow('Channel: ', self.clist)
 
         self.control_panel.addRow(str(''),layout)
         self.control_panel.addRow(str(''),self.remove_btn)

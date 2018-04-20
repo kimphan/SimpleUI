@@ -56,11 +56,11 @@ class PlotManager(QObject):
             # Plot all channel in 1 graph
             for i in range(count):
                 pen = pg.mkPen(self.color_dict[i], width=1, style=None)
-                self.plot[0].plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(i), pen=pen)
+                self.plot[0].plotItem.plot(self.worker.get_xnormbuffer(), self.worker.get_autocorrelation(i), pen=pen)
             # Individual plot
             while c <= widget_num-1:
                 pen = pg.mkPen(self.color_dict[c-1], width=1, style=None)
-                self.plot[c].plotItem.plot(self.worker.getxbuffer(), self.worker.getybuffer(c-1), pen=pen)
+                self.plot[c].plotItem.plot(self.worker.get_xnormbuffer(), self.worker.get_autocorrelation(c-1), pen=pen)
                 c += 1
         else:
             self.stop()

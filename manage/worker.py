@@ -92,18 +92,26 @@ class Worker:
     def get_channel_num(self):
         return self._lines
 
+
     # Get timer value
-    def getxbuffer(self):
+    def get_timebuffer(self):
+        return self._xbuffer.get_all()
+    # Get raw data
+    def get_rawdata(self,i):
+        return self._ybuffer[i].get_all()
+
+    # Get normalized timer value
+    def get_xnormbuffer(self):
         # Normalize time values where the autocorrelation values are found
         xnorm = self._xbuffer.get_all() - np.mean(self._xbuffer.get_all())
         return xnorm
 
-    # Get raw data from sensors and compute
+    # Autocorrelation
     # Computation: filter raw data using Saviztky-Golay method
     #              detect the randomness in data with autocorrelation coefficient function
     #  Note: Lag value is an integer denoting how many time steps separate one value form another.
     #        Testing for randomness, need only one value of autocorrelation coefficient using lag k = 1
-    def getybuffer(self, i):
+    def get_autocorrelation(self, i):
         sgf = savgol_filter(self._ybuffer[i].get_all(),polyorder=3,window_length=37) # Filter the raw data
         ynorm = sgf - np.mean(sgf) # Normalize data
         y1 = np.sum(ynorm**2)      # Lag value at k=1
