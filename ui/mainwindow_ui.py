@@ -9,7 +9,6 @@ import os, signal,serial
 
 class ExampleUI (QMainWindow):
     LABELFONT = 15
-    add_button = pyqtSignal('QGridLayout', int, int, int, str, str, str, int)
 
     def __init__(self):
         super(ExampleUI, self).__init__()
@@ -40,6 +39,7 @@ class ExampleUI (QMainWindow):
         self.windowLayout.setAlignment(Qt.AlignLeft)
         self.central_widget.setLayout(self.windowLayout)
         self.loadui()
+        self.channel_scan()
 
     # Setup UI for main window
     def loadui(self):
@@ -52,12 +52,14 @@ class ExampleUI (QMainWindow):
         self.channel_list = QComboBox()
         self.graph_type = QComboBox()
         self.list_port = QComboBox()
-        self.channel_name = QLineEdit()
         self.baudrate = QLineEdit()
+        self.sample = QLineEdit()
         self.mode1 = QRadioButton('Raw data')
         self.mode2 = QRadioButton('Randomness Test')
 
         self.mode1.setChecked(True)
+        self.baudrate.setText('115200')
+        self.sample.setText('100')
 
         # Graph type list for displaying option
         self.graph_type.addItem('Serial')
@@ -75,16 +77,16 @@ class ExampleUI (QMainWindow):
         add_channel = QGroupBox('Add Channel')
         add_channel.setStyleSheet('font-size: 12pt; color: 606060;')
         addC = QFormLayout()
-        addC.addRow('Source Type: ', self.graph_type)
-        addC.addRow('Plot Name: ', self.channel_name)
+        addC.addRow('Source: ', self.graph_type)
         addC.addRow('Port: ', self.list_port)
         addC.addRow('Baudrate: ', self.baudrate)
+        addC.addRow('Sample: ', self.sample)
         addC.addRow('Channel: ', group_cwidget)
-        addC.addRow('Display Mode: ', display_mode)
+        addC.addRow('Display: ', display_mode)
         addC.addRow('', add_btn)
 
         add_channel.setLayout(addC)
-        add_channel.setFixedWidth(self.w/4)
+        add_channel.setFixedWidth(self.w/5)
 
         self.graph_display = QGridLayout()
         self.graph_display.setAlignment(Qt.AlignTop)
@@ -93,15 +95,6 @@ class ExampleUI (QMainWindow):
         self.windowLayout.addWidget(add_channel)
         self.windowLayout.addLayout(self.graph_display)
         self.windowLayout.addStretch()
-
-    # Label
-    @staticmethod
-    def label(name,fontsize=12):
-        lbl = QLabel()
-        lbl.setText(name)
-        lbl.minimumSizeHint()
-        lbl.setStyleSheet('font-size: {}pt; color: 606060;'.format(fontsize))
-        return lbl
 
     # Put the application window in the center of the screen
     # Credit from: http://zetcode.com/gui/pyqt5/firstprograms/
@@ -150,6 +143,32 @@ class ExampleUI (QMainWindow):
     def edit_name(self):
         pass
 
+    def channel_scan(self):
+        graphID = self.graph_type.currentIndex()
+        scan = SerialScan()
+        plist = scan._scan_serial_port()
+        if graphID==1:
+            c = 2
+        elif graphID == 0:
+            for p in plist:
+                self.list_port.addItem(p)
+                try:
+                    ser = serial.Serial(port=p,baudrate=int(self.baudrate.text()),stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=1)
+                    if ser.is_open:
+                        line = ser.readline()
+                    values = line.decode("UTF-8").split(',')
+                    c = len(values)
+                    if c>1:
+                        self.list_port.setCurrentText(p)
+                    ser.close()
+                except:
+                    print('Access denied')
+        else: c = -1
+        if c > 1:
+            self.channel_list.addItem('All')
+            for i in range(c):
+                self.channel_list.addItem(str(i+1))
+
     def on_add_event(self):
         sending_button = self.sender()
         self.statusBar().showMessage('{}'.format(sending_button.text()))
@@ -157,19 +176,11 @@ class ExampleUI (QMainWindow):
         if self.addtopbottom and self.key == 1:
             self.key = 2
             self.addtopbottom = False
-        self.channel_list.addItem(self.graph_type.currentText())
 
-        g = self.draw(self.graph_type.currentIndex(),self.channel_name.text())
-        if g is not None:
-            g.channel_scan()
-            _plot_manager = PlotManager(g.graphID, g.sample_num.text(), g.rate_num.text(), g.serial_port.currentText(), g.plot)
-            # _plot_manager.make_connection(g)
-            self.store_plot.update({self.key: _plot_manager})
-            self.plot(self.key)
 
-        self.channel_name.clear()
-        self.x_axis.setText('Time (s)')
-        self.y_axis.clear()
+        g = self.draw(self.graph_type.currentIndex(),self.channel_list.currentText())
+
+
 
     def draw(self,graph_id,graph_title):
         if self.plot_count >= 3:
@@ -179,10 +190,18 @@ class ExampleUI (QMainWindow):
         else:
             self.plot_count += 1
             self.key += 1
-            graph = GraphUi(graph_id,
-                        self.w * 3/4, self.h/3,
-                        self.x_axis.text(), self.y_axis.text(), graph_title,
-                        self.key)
+            graph = GraphUi(graph_i=graph_id,sample=self.sample.text(),
+                        width=self.w * 4/5, height=self.h/3,
+                        port=self.list_port.currentText(), brate=self.baudrate.text(), title=graph_title,
+                        key=self.key)
+
+            # _plot_manager = PlotManager(g_id=graph.graphID,
+            #                             samples=int(self.sample.text()),
+            #                             rate=float(self.baudrate.text()),
+            #                             port=self.list_port.currentText(),
+            #                             plot_widget=graph.plot)
+            # self.store_plot.update({self.key: _plot_manager})
+            # self.plot(self.key)
 
             self.graph_display.setRowStretch(self.key, 3)
             draw_graph = graph.addgraph()
@@ -198,7 +217,6 @@ class ExampleUI (QMainWindow):
         _object_.stop_action.connect(self.stop_plot)
         _object_.subplot_draw.connect(self.subplot_selection)
 
-
     def closeEvent(self, event):
         if len(self.store_plot) != 0 :
             for plot_id in self.store_plot.keys():
@@ -213,11 +231,11 @@ class ExampleUI (QMainWindow):
                 screen_resolution = qApp.desktop().screenGeometry()
                 self.w, self.h = screen_resolution.width(), screen_resolution.height()
                 self.h -= 100
-                self.resize_plot(self.w*3/4, self.h/3)
+                self.resize_plot(self.w*4/5, self.h/3)
             else:
                 self.h = 700
                 self.w = 1300
-                self.resize_plot(self.w*3/4, self.h/3)
+                self.resize_plot(self.w*4/5, self.h/3)
 
         super(ExampleUI,self).changeEvent(event)
 
@@ -284,7 +302,7 @@ class ExampleUI (QMainWindow):
         plot_manager= self.store_plot[key]
         plot_manager.update_parameter(info.sample_num.text(), info.rate_num.text())
         plot_manager.start()
-        info.enable_ui(False, info.stop_btn, info.run_btn, info.rate_num, info.serial_port)
+        info.enable_ui(False, info.stop_btn, info.run_btn)
 
     @pyqtSlot(int)
     def stop_plot(self,stop_id):
